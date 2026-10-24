@@ -34,6 +34,7 @@ final class Report {
     static void show(Activity a, Variant v) {
         boolean german = Lang.german(a);
         prefs(a).edit().putString(KEY_ISSUED, week()).apply();
+        Stamps.award(a, "report");
         StateMenu.dress(new AlertDialog.Builder(a, android.R.style.Theme_DeviceDefault_Dialog_Alert)
                 .setTitle(title(german))
                 .setMessage(String.join("\n", lines(a, german)))

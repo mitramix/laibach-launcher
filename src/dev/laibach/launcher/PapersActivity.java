@@ -2,13 +2,17 @@ package dev.laibach.launcher;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -125,9 +129,11 @@ public class PapersActivity extends StateActivity {
                 streak + (streak == 1 ? t(" DAY", " TAG") : t(" DAYS", " TAGE")),
                 t("ATTENTION USED", "AUFMERKSAMKEIT"), span(Citizen.used(this)));
         figures(t("EXEMPTIONS", "AUSNAHMEN"), String.valueOf(Citizen.exemptions(this)),
-                t("JOY COUPONS", "FREUDENMARKEN"), Citizen.joyLeft(this) + " / " + Citizen.JOY_COUPONS);
+                t("JOY COUPONS", "FREUDENMARKEN"), Citizen.joyLeft(this) + " / " + Citizen.coupons(this));
         figures(t("SELF-CRITICISMS", "SELBSTKRITIKEN"), String.valueOf(Citizen.confessions(this)),
                 t("RECORD ENTRIES", "AKTENEINTRÄGE"), String.valueOf(Record.entries(this).size()));
+        figures(t("DEFECTIONS", "REPUBLIKFLUCHTEN"), String.valueOf(ExitVisa.issued(this)),
+                t("STAMPS", "MARKEN"), Stamps.count(this) + " / " + Stamps.ALL.length);
         // Harmony is always nearly perfect; the norm is always exceeded.
         int seed = Norm.seed(year * 1000L + day);
         figures(t("COLLECTIVE HARMONY", "KOLLEKTIVE HARMONIE"),
@@ -135,6 +141,7 @@ public class PapersActivity extends StateActivity {
                 t("NORM FULFILMENT", "NORMERFÜLLUNG"), Norm.today(this) + "%");
 
         quotas();
+        album();
 
         // The article of the day; tap for the whole constitution.
         heading(t("ARTICLE OF THE DAY", "ARTIKEL DES TAGES"));
@@ -174,6 +181,8 @@ public class PapersActivity extends StateActivity {
         heading(t("PAPERS FOR EXPORT", "PAPIERE ZUR AUSFUHR"));
         content.addView(button(t("WEEKLY REPORT", "WOCHENBERICHT"), view -> Report.show(this, v)), fullWidth());
         content.addView(button(t("SAVE THE CARD AS A PICTURE", "AUSWEIS ALS BILD SPEICHERN"), view -> saveCard()),
+                spaced());
+        content.addView(button(t("SHARE THE CARD (SPECIMEN)", "AUSWEIS TEILEN (MUSTER)"), view -> shareCard()),
                 spaced());
         content.addView(button(t("PRINT THE CASE FILE (PDF)", "FALLAKTE DRUCKEN (PDF)"), view -> caseFile()), spaced());
         content.addView(button(t("BACK UP THE SETTINGS", "EINSTELLUNGEN SICHERN"), view -> backup()), spaced());
@@ -396,7 +405,9 @@ public class PapersActivity extends StateActivity {
                             : t("Your confession has been filed. Forgiveness is rationed: one a day.",
                                     "Ihr Geständnis wurde abgelegt. Vergebung ist rationiert: eine pro Tag."),
                             Toast.LENGTH_LONG).show();
+                    Stamps.award(this, "confession");
                     fill();
+                    Promotion.check(this);
                 })
                 .setNegativeButton(t("I have nothing to say", "Ich habe nichts zu sagen"), (d, which) ->
                         Toast.makeText(this, t("Your silence has been recorded.", "Ihr Schweigen wurde aufgezeichnet."),
@@ -409,6 +420,76 @@ public class PapersActivity extends StateActivity {
         if (ok) Record.note(this, "CITIZEN CARD COPIED AS A SPECIMEN.", "BÜRGERAUSWEIS ALS MUSTER KOPIERT.");
         Toast.makeText(this, ok ? t("Specimen saved in Pictures/Laibach.", "Muster in Pictures/Laibach gespeichert.")
                 : t("The card could not be copied.", "Der Ausweis konnte nicht kopiert werden."), Toast.LENGTH_LONG).show();
+    }
+
+    private void shareCard() {
+        Uri uri = Exports.shareCard(this, card, v);
+        if (uri == null) {
+            Toast.makeText(this, t("The card could not be copied.", "Der Ausweis konnte nicht kopiert werden."),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        Record.note(this, "CITIZEN CARD SHARED AS A SPECIMEN. IT CONFERS NO RIGHTS.",
+                "BÜRGERAUSWEIS ALS MUSTER GETEILT. ER VERLEIHT KEINE RECHTE.");
+        Intent send = new Intent(Intent.ACTION_SEND);
+        send.setType("image/jpeg");
+        send.putExtra(Intent.EXTRA_STREAM, uri);
+        send.setClipData(ClipData.newRawUri("", uri));
+        send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent chooser = Intent.createChooser(send, t("SHARE THE SPECIMEN", "DAS MUSTER TEILEN"));
+        // The state's own desks would only censor or develop the card again.
+        chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, new ComponentName[]{
+                new ComponentName(this, CensorActivity.class), new ComponentName(this, DarkroomActivity.class)});
+        startActivity(chooser);
+    }
+
+    /** The stamp album: every stamp the state issues, three to a row, the missing ones in outline. */
+    private void album() {
+        heading(t("STAMP ALBUM", "MARKENALBUM"));
+        TextView count = type(11, v.muted, 80, 650);
+        count.setText(String.format(locale, t("%d OF %d ISSUED. TAP A STAMP TO SEE IT AWARDED AGAIN.",
+                "%d VON %d AUSGEGEBEN. TIPPEN SIE EINE MARKE AN, UM SIE ERNEUT VERLIEHEN ZU SEHEN."),
+                Stamps.count(this), Stamps.ALL.length));
+        count.setLetterSpacing(0.1f);
+        count.setPadding(0, 0, 0, dp(10));
+        content.addView(count);
+        SimpleDateFormat date = new SimpleDateFormat(t("d MMM yyyy", "d. MMM yyyy"), locale);
+        LinearLayout r = null;
+        for (int i = 0; i < Stamps.ALL.length; i++) {
+            if (i % 3 == 0) {
+                r = row();
+                r.setPadding(0, 0, 0, dp(12));
+                content.addView(r);
+            }
+            Stamps.Stamp s = Stamps.ALL[i];
+            long when = Stamps.issued(this, s.key);
+            LinearLayout cell = column();
+            cell.setGravity(Gravity.CENTER_HORIZONTAL);
+            cell.addView(new StampArt.StampView(this, v, s.glyph, when > 0),
+                    new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            TextView name = type(9, when > 0 ? v.ink : v.muted, 70, 850);
+            name.setText(Lang.pick(german, s.name));
+            name.setGravity(Gravity.CENTER);
+            name.setLetterSpacing(0.08f);
+            name.setPadding(0, dp(4), 0, 0);
+            cell.addView(name);
+            TextView issued = type(8, when > 0 ? v.accent : v.rule, 80, 700);
+            issued.setText(when > 0 ? date.format(new Date(when)).toUpperCase(locale) : t("NOT YET ISSUED", "NOCH NICHT AUSGEGEBEN"));
+            issued.setGravity(Gravity.CENTER);
+            issued.setLetterSpacing(0.1f);
+            cell.addView(issued);
+            if (when > 0) {
+                cell.setOnClickListener(view -> Ceremony.show(this, s.glyph, Lang.pick(german, s.name),
+                        t("ISSUED ON ", "AUSGEGEBEN AM ") + date.format(new Date(when)).toUpperCase(locale)));
+            }
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+            lp.setMargins(i % 3 == 0 ? 0 : dp(6), 0, i % 3 == 2 ? 0 : dp(6), 0);
+            r.addView(cell, lp);
+        }
+        // The last row keeps its columns even when it is short.
+        while (r != null && r.getChildCount() % 3 != 0) {
+            r.addView(new View(this), new LinearLayout.LayoutParams(0, 0, 1f));
+        }
     }
 
     private void caseFile() {

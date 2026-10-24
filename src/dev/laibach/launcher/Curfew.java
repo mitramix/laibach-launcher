@@ -147,6 +147,7 @@ final class Curfew extends HomePart {
                     "SPERRSTUNDENÜBUNG ABGESCHLOSSEN. FOLGSAMKEIT VORBILDLICH.");
             message = t("Drill complete. Your compliance has been noted.",
                     "Übung beendet. Ihre Folgsamkeit wurde vermerkt.");
+            Stamps.award(home, "drill");
         } else {
             long until = Citizen.exempt(home, 30 * 60_000L);
             String end = new SimpleDateFormat("HH:mm", Locale.ROOT).format(new Date(until));

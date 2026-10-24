@@ -610,6 +610,7 @@ public class DarkroomActivity extends StateActivity {
                 Record.note(this, String.format(Locale.ROOT, "A PHOTOGRAPH WAS DEVELOPED AND FILED. %d BAR(S), %d RETOUCH(ES).", barCount, painted),
                         String.format(Locale.ROOT, "EIN FOTO WURDE ENTWICKELT UND ABGELEGT. %d BALKEN, %d RETUSCHE(N).", barCount, painted));
                 Tones.play(this, Tones.stamp());
+                Stamps.award(this, "darkroom");
                 Toast.makeText(this, t("FILED IN PICTURES/LAIBACH.", "ABGELEGT IN PICTURES/LAIBACH."), Toast.LENGTH_SHORT).show();
             });
         }, "darkroom-file").start());

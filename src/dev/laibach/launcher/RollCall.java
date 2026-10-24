@@ -117,6 +117,8 @@ final class RollCall extends HomePart {
                     "APPELL " + time + ": ANWESEND. TAG " + days + " LÜCKENLOSER ANWESENHEIT.");
             toast(String.format(locale, t("Counted. Day %d. The Collective is complete.",
                     "Gezählt. Tag %d. Das Kollektiv ist vollzählig."), days));
+            Stamps.award(home, "roll");
+            Promotion.attendance(home, days);
         } else {
             Record.note(home, "ROLL CALL " + time + ": ABSENT IN SPIRIT. ATTENDANCE RESET.",
                     "APPELL " + time + ": GEISTIG ABWESEND. ANWESENHEIT ZURÜCKGESETZT.");

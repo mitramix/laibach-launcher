@@ -234,8 +234,13 @@ final class Citizen {
         p.edit().putString(key + "Day", today()).putInt(key, today(p, key) + 1).apply();
     }
 
+    /** Today's coupons: the usual five, and one more on Foundation Day. */
+    static int coupons(Context c) {
+        return JOY_COUPONS + (Foundation.today(c) ? 1 : 0);
+    }
+
     static int joyLeft(Context c) {
-        return Math.max(0, JOY_COUPONS - today(prefs(c), "joySpent"));
+        return Math.max(0, coupons(c) - today(prefs(c), "joySpent"));
     }
 
     /** Spends a coupon and returns how many remain. */

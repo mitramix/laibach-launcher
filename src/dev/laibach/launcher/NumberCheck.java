@@ -102,6 +102,8 @@ final class NumberCheck {
                 if (d.equals(judged[0])) return;
                 judged[0] = d;
                 Tones.play(a, Tones.stamp());
+                if (ok && d.equals(own)) Stamps.award(a, "self");
+                if (!ok) Stamps.award(a, "forgery");
                 if (!ok) Record.note(a, "A FORGED NUMBER WAS PRESENTED AT THE COUNTER. IT HAS BEEN CONFISCATED.",
                         "AM SCHALTER WURDE EINE GEFÄLSCHTE NUMMER VORGELEGT. SIE WURDE EINGEZOGEN.");
             }

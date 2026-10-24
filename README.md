@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/VERSION-2.4.2%20THE%20DARKROOM-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.4.2, The Darkroom">
+  <img src="https://img.shields.io/badge/VERSION-2.6%20THE%20RECORD-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.6, The Record">
   <img src="https://img.shields.io/badge/ANDROID-12%2B-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Android 12 or later">
-  <img src="https://img.shields.io/badge/SIZE-~170%20KB-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="About 170 KB">
+  <img src="https://img.shields.io/badge/SIZE-~235%20KB-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="About 235 KB">
   <img src="https://img.shields.io/badge/LIBRARIES-NONE-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="No libraries">
   <img src="https://img.shields.io/badge/LANGUAGES-EN%20%C2%B7%20DE%20%C2%B7%20SL-C1121F?style=flat-square&labelColor=0A0A0A" alt="English, German, Slovenian">
 </p>
@@ -68,9 +68,9 @@ default.
 | | |
 |---|---|
 | **Package** | `dev.laibach.launcher` |
-| **Version** | 2.4.2, *The Darkroom* |
-| **Source** | 31 Java files, no libraries, no Gradle |
-| **Size** | about 205 KB |
+| **Version** | 2.6, *The Record* |
+| **Source** | 71 Java files, no libraries, no Gradle |
+| **Size** | about 235 KB |
 | **Requires** | Android 12 (API 31) or later |
 
 **Statement of origin.** All artwork and text of the launcher are original
@@ -128,7 +128,8 @@ of the home screen extends `HomePart` and draws with the shared tools in
 | **Programmes** | `App`, `ProgrammeAdapter` (rows, grids, ministry headers), `Counter` (opening a programme past the quotas, the ration, the queue and the coupons), `WaitingRoom`, `ProgrammeMenu`, `Ministry`, `Quotas`, `Formation` |
 | **Menus and orders** | `GearMenu`, `Orders`, `CallUps`, `PowerRation`, `StateMenu` |
 | **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Backdrop`, `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
-| **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Exports` |
+| **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Exports`, `ExitVisa` |
+| **Honours** | `Stamps` (the album), `StampArt` (glyphs, stamps and medals), `Ceremony`, `Promotion`, `Foundation` |
 | **Language** | `Lang`, `Slovene` (every English string has its Slovenian) |
 
 ### ■ Installation over adb
@@ -179,6 +180,7 @@ property of the channel.
 
 <table>
 <tr><td align="center"><img src="docs/screenshots/papers.jpg" width="250" alt="Papers: identity card and statistics"><br><sub>Papers: identity card and statistics</sub></td><td align="center"><img src="docs/screenshots/papers-2.jpg" width="250" alt="Self-criticism and the permanent record"><br><sub>Self-criticism and the permanent record</sub></td><td align="center"><img src="docs/screenshots/constitution.jpg" width="250" alt="The Constitution"><br><sub>The Constitution</sub></td></tr>
+<tr><td align="center"><img src="docs/screenshots/stamp-album.jpg" width="250" alt="The stamp album"><br><sub>The stamp album</sub></td><td align="center"><img src="docs/screenshots/ceremony.jpg" width="250" alt="A ceremony"><br><sub>A ceremony</sub></td></tr>
 </table>
 
 ### ■ Routines and Laibach TV
@@ -283,7 +285,7 @@ The first match of a search is marked in the accent colour.
 | Action | Result |
 |---|---|
 | **Tap the gear** (or long-press the clock) | The menu |
-| **Long-press a programme** | Redact / Declassify, Rationed, Essential, Transfer to ministry, Dossier, Banish |
+| **Long-press a programme** | Redact / Declassify, Rationed, Essential, Transfer to ministry, Dossier, Banish (redacting and banishing need an exit visa) |
 | **Tap the footer** `N REDACTED — DECLASSIFY` | Everything listed, redacted and suspended programmes dimmed |
 | **Home or Back** | Search cleared, back to the top, redacted programmes hidden again |
 
@@ -472,6 +474,17 @@ offers **Return to its own ministry**. Transfers are filed in the preferences
 file `ministries`. Search shows a plain list, without ministry headers. The
 keywords are kept in `Ministry.java`.
 
+### ■ Exit visa
+
+No programme leaves the terminal without papers. **Redact** and **Banish**
+first lay **Form 7-B** before the citizen: applicant, ministry, destination
+(`THE ARCHIVE (REDACTION)` or `OBLIVION (UNINSTALL)`) and a reason for
+leaving, from *Insufficient loyalty* to *No reason. (This is noted.)*
+**Stamp** brings down `APPROVED`, and only then is the programme redacted, or
+Android asked to uninstall it. Each visa is numbered, `EXIT VISA № 0001`,
+and the defection goes on the record. The papers count the defections.
+Declassifying needs no visa: the state always welcomes a return.
+
 ### ■ Ministry quotas
 
 **Menu → Settings → Regulations → Ministry quotas** (off by default) gives
@@ -535,12 +548,46 @@ Tap the papers row on the terminal (citizen number and standing), or go to
   change daily. Both are invented.
 - **Ministry quotas**: what each ministry has spent today against its
   allowance (see [Ministry quotas](#-ministry-quotas)).
+- **The stamp album**, described below. The statistics also count stamps
+  and defections.
 - **The counter.** **Check a citizen number** takes any 21-digit number and
   checks its Damm digit: `VALID` or `FORGED`. One mistyped digit, or two
   neighbours swapped, is always caught. The citizen's own number is
   recognised: `THIS IS YOU. YOU MAY PASS.` Forgeries are noted on the record.
 - **Article of the day** from the Constitution.
 - **Self-criticism and the permanent record**, described below.
+- **Save the card as a picture** puts it in Pictures/Laibach. **Share the
+  card (specimen)** hands the same picture to any app through the share
+  menu. Either way, `SPECIMEN` is printed across it and along its foot: `A
+  WORK OF FICTION · CONFERS NO RIGHTS`. The shared copy lives in the
+  launcher's cache and is swept away after a day.
+
+### ■ The stamp album
+
+Thirteen stamps, each for a first deed the state wishes to see again: the
+first roll call, 7 and 30 days present, the first confession, a promotion, a
+curfew drill, checking one's own papers, a forgery confiscated, an exit
+visa, a text censored, a print developed, a weekly report read, and
+Foundation Day. Stamps not yet issued are drawn in outline. An issued stamp
+bears its date. Tap it to see it awarded again. The album keeps only the
+date of each stamp, in the preferences file `stamps`.
+
+### ■ Ceremonies
+
+A promotion is not a toast. When the standing rises during the day (a
+forgiven confession lifts it a grade), the terminal is covered by a medal on
+its ribbon, its sunburst turning, with the state's fanfare: `PROMOTION. YOU
+ARE RAISED TO …`. Attendance is decorated the same way at 7, 30, 100 and 365
+days: the **Order of Attendance**. `THE COLLECTIVE APPLAUDS. BRIEFLY.` A tap
+returns the citizen to work. The fanfare follows the Regulations' sound
+switch.
+
+### ■ Foundation Day
+
+Each year, on the day the launcher was first installed, the state celebrates
+its founding: a ceremony, a stamp, a note on the record and **one extra joy
+coupon** for the day. A terminal founded on 29 February observes the day on
+28 February in other years.
 
 ### ■ The permanent record
 
@@ -728,8 +775,9 @@ storage, into a `Laibach` folder, and nowhere else.
 | Export | Contents | Destination |
 |---|---|---|
 | **Save the card as a picture** | The citizen card, overprinted SPECIMEN so that it is never mistaken for a document | PNG in `Pictures/Laibach` |
+| **Share the card (specimen)** | The same picture, lent to the app the citizen chooses through the share menu | JPEG in the launcher's cache, swept away after a day |
 | **Print the case file** | Citizen number, standing, the weekly report and the permanent record | PDF in `Download/Laibach` |
-| **Back up the settings** | All of the launcher's preferences (uniform, plan, language, hidden, rationed and essential programmes, ministries, curfew, reveille, sounds, the record) | JSON in `Download/Laibach` |
+| **Back up the settings** | All of the launcher's preferences (uniform, plan, language, hidden, rationed and essential programmes, ministries, curfew, reveille, sounds, the record, the stamp album, the exit visas) | JSON in `Download/Laibach` |
 | **Restore the settings** | Reads the newest backup there and redraws the terminal | — |
 
 The dressed lock-screen picture belongs to the phone and is excluded from
@@ -970,6 +1018,7 @@ The state was built in stages. Each stage was fulfilled ahead of schedule.
 | **2.4.1** | — | The censor's desk: text shared to the launcher comes back blacked out, as a decree or as a typed memo. |
 | **2.4.2** | — | Every citizen is renumbered: the full 64-bit Android ID as 20 digits and a Damm check digit. No two phones share a number. |
 | **2.5** | The Plan | The daily norm, ministry quotas and inventory, the waiting room, the informant in the weekly report, and the number check at the counter. The terminal is rebuilt from separate organs. |
+| **2.6** | The Record | The exit visa for every redaction and banishment, ceremonies for promotions and attendance, Foundation Day with its extra joy coupon, the stamp album, and the identity card shared as a specimen. |
 
 <details>
 <summary><b>🔍 Findings of the inspectorate</b></summary>

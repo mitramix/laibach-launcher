@@ -90,14 +90,14 @@ final class Counter extends HomePart {
         }
         if (Citizen.joyLeft(home) > 0) {
             int left = Citizen.spendJoy(home);
-            int spent = Citizen.JOY_COUPONS - left;
-            Record.note(home, "JOY COUPON " + spent + " OF " + Citizen.JOY_COUPONS + " SPENT.",
-                    "FREUDENMARKE " + spent + " VON " + Citizen.JOY_COUPONS + " EINGELÖST.");
+            int coupons = Citizen.coupons(home), spent = coupons - left;
+            Record.note(home, "JOY COUPON " + spent + " OF " + coupons + " SPENT.",
+                    "FREUDENMARKE " + spent + " VON " + coupons + " EINGELÖST.");
             Toast.makeText(home, left == 0
                     ? t("Last joy coupon spent. Enjoy it thoroughly.", "Letzte Freudenmarke eingelöst. Genießen Sie gründlich.")
                     : String.format(locale, t("Joy coupon spent. %d of %d remain. Enjoy responsibly.",
                             "Freudenmarke eingelöst. %d von %d übrig. Genießen Sie verantwortungsvoll."),
-                            left, Citizen.JOY_COUPONS), Toast.LENGTH_SHORT).show();
+                            left, Citizen.coupons(home)), Toast.LENGTH_SHORT).show();
             home.ledger.update();
             start(a, from);
             return;
@@ -107,7 +107,7 @@ final class Counter extends HomePart {
                 .setMessage(String.format(locale, t("All %d joy coupons have been spent today. Further joy is "
                                 + "charged to your standing, one grade at a time.",
                         "Alle %d Freudenmarken sind für heute eingelöst. Weitere Freude geht zu Lasten "
-                                + "Ihres Ansehens, eine Stufe nach der anderen."), Citizen.JOY_COUPONS))
+                                + "Ihres Ansehens, eine Stufe nach der anderen."), Citizen.coupons(home)))
                 .setNegativeButton(t("Renounce joy", "Auf Freude verzichten"), (d, w) -> {
                     Record.note(home, "JOY RENOUNCED VOLUNTARILY. THE SACRIFICE IS APPRECIATED.",
                             "AUF FREUDE FREIWILLIG VERZICHTET. DAS OPFER WIRD GESCHÄTZT.");

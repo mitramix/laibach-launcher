@@ -385,6 +385,7 @@ public class CensorActivity extends StateActivity {
         Record.note(this, String.format(Locale.ROOT, "A TEXT WAS CENSORED AND ISSUED. %d WORD(S) BLACKED OUT.", n),
                 String.format(Locale.ROOT, "EIN TEXT WURDE ZENSIERT UND HERAUSGEGEBEN. %d WORT/WÖRTER GESCHWÄRZT.", n));
         Tones.play(this, Tones.stamp());
+        Stamps.award(this, "censor");
         show();
     }
 

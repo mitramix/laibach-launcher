@@ -278,6 +278,10 @@ public class HomeActivity extends StateActivity {
         updateClock();
         reload();
         updateState();
+        if (!curfew.showing()) {
+            Promotion.check(this);
+            Foundation.celebrate(this);
+        }
         decree.update();
         regulations.refresh();
         if (formation.has(Formation.ART) && WallArt.due(this)) artCredit.next();

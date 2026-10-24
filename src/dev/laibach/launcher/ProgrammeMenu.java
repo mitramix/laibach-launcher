@@ -81,15 +81,16 @@ final class ProgrammeMenu extends HomePart {
                     return true;
                 }
                 case 1:
-                    home.setHidden(a, !a.hidden);
+                    // Declassifying is a return and needs no papers; redacting is a departure.
+                    if (a.hidden) home.setHidden(a, false);
+                    else ExitVisa.apply(home, a.label, a.ministry, false, () -> home.setHidden(a, true));
                     return true;
                 case 2:
                     home.launcherApps.startAppDetailsActivity(a.info.getComponentName(), a.info.getUser(), null, null);
                     return true;
                 case 3:
-                    Record.note(home, "BANISHMENT OF " + a.label.toUpperCase(Locale.ROOT) + " REQUESTED.",
-                            "VERBANNUNG VON " + a.label.toUpperCase(Locale.GERMAN) + " BEANTRAGT.");
-                    open(new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", a.packageName(), null)));
+                    ExitVisa.apply(home, a.label, a.ministry, true, () ->
+                            open(new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", a.packageName(), null))));
                     return true;
                 default:
                     return false;

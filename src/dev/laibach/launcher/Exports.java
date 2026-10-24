@@ -22,6 +22,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +47,7 @@ final class Exports {
     static final String FOLDER = "Laibach";
     private static final String SETTINGS_PREFIX = "laibach-settings-";
     /** The preference files a backup carries; caches and chosen pictures stay behind. */
-    private static final String[] BACKED_UP = {Variant.PREFS, "citizen", "record", "ministries", "tv"};
+    private static final String[] BACKED_UP = {Variant.PREFS, "citizen", "record", "ministries", "tv", "stamps", "visas"};
 
     private Exports() {}
 
@@ -56,7 +59,41 @@ final class Exports {
 
     /** Draws the card as it is shown, overprints it as a specimen and saves it to Pictures/Laibach. */
     static boolean saveCard(Context c, View card, Variant v) {
-        if (card.getWidth() == 0 || card.getHeight() == 0) return false;
+        Bitmap bmp = specimen(c, card, v);
+        if (bmp == null) return false;
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, "laibach-citizen-card-" + stamp() + ".png");
+        values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
+        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + FOLDER);
+        boolean ok = write(c, MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values,
+                out -> bmp.compress(Bitmap.CompressFormat.PNG, 100, out));
+        bmp.recycle();
+        return ok;
+    }
+
+    /**
+     * The specimen as a file in the darkroom's cache, for the share menu: the
+     * uri to lend, or null when it could not be drawn. Copies older than a
+     * day are swept away.
+     */
+    static Uri shareCard(Context c, View card, Variant v) {
+        Bitmap bmp = specimen(c, card, v);
+        if (bmp == null) return null;
+        DarkroomProvider.sweep(c);
+        String name = "card-" + System.currentTimeMillis() + ".jpg";
+        boolean ok;
+        try (OutputStream out = new FileOutputStream(new File(DarkroomProvider.dir(c), name))) {
+            ok = bmp.compress(Bitmap.CompressFormat.JPEG, 92, out);
+        } catch (IOException e) {
+            ok = false;
+        }
+        bmp.recycle();
+        return ok ? DarkroomProvider.uri(name) : null;
+    }
+
+    /** The card drawn as it is shown, with SPECIMEN printed across it and along its foot. */
+    private static Bitmap specimen(Context c, View card, Variant v) {
+        if (card.getWidth() == 0 || card.getHeight() == 0) return null;
         int margin = Math.round(24 * c.getResources().getDisplayMetrics().density);
         Bitmap bmp = Bitmap.createBitmap(card.getWidth() + 2 * margin, card.getHeight() + 2 * margin,
                 Bitmap.Config.ARGB_8888);
@@ -84,15 +121,7 @@ final class Exports {
         over.setTextSize(margin * 0.55f);
         canvas.drawText(specimen + " · A WORK OF FICTION · CONFERS NO RIGHTS", bmp.getWidth() / 2f,
                 bmp.getHeight() - margin * 0.3f, over);
-
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.MediaColumns.DISPLAY_NAME, "laibach-citizen-card-" + stamp() + ".png");
-        values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
-        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + FOLDER);
-        boolean ok = write(c, MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values,
-                out -> bmp.compress(Bitmap.CompressFormat.PNG, 100, out));
-        bmp.recycle();
-        return ok;
+        return bmp;
     }
 
     // ---- The case file ----------------------------------------------------
