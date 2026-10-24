@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A cogwheel around a red disc with a Suprematist cross. Generated; see README. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF0A0A0A" android:pathData="M0,54a54,54 0 1,0 108,0a54,54 0 1,0 -108,0z" />
+    <path android:fillColor="#FFECE6D6" android:pathData="M92.37,47.02 L99.70,48.71 L99.70,59.29 L92.37,60.98 L90.72,67.14 L96.22,72.27 L90.93,81.43 L83.74,79.23 L79.23,83.74 L81.43,90.93 L72.27,96.22 L67.14,90.72 L60.98,92.37 L59.29,99.70 L48.71,99.70 L47.02,92.37 L40.86,90.72 L35.73,96.22 L26.57,90.93 L28.77,83.74 L24.26,79.23 L17.07,81.43 L11.78,72.27 L17.28,67.14 L15.63,60.98 L8.30,59.29 L8.30,48.71 L15.63,47.02 L17.28,40.86 L11.78,35.73 L17.07,26.57 L24.26,28.77 L28.77,24.26 L26.57,17.07 L35.73,11.78 L40.86,17.28 L47.02,15.63 L48.71,8.30 L59.29,8.30 L60.98,15.63 L67.14,17.28 L72.27,11.78 L81.43,17.07 L79.23,24.26 L83.74,28.77 L90.93,26.57 L96.22,35.73 L90.72,40.86z" />
+    <path android:fillColor="#FFC1121F" android:pathData="M26,54a28,28 0 1,0 56,0a28,28 0 1,0 -56,0z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M49.6,43h8.8v6.6h6.6v8.8h-6.6v6.6h-8.8v-6.6h-6.6v-8.8h6.6z" />
+</vector>

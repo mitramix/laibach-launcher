@@ -1,0 +1,11 @@
+# Build output
+build/
+
+# Signing key and its password: never commit them; back them up separately
+keystore/
+*.jks
+*.keystore
+
+# macOS
+.DS_Store
+._*

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The censor's desk: a typed sheet with black bars on a black disc, the red cross in its corner. Original artwork. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF0A0A0A" android:pathData="M0,54a54,54 0 1,0 108,0a54,54 0 1,0 -108,0z" />
+    <path android:fillColor="#FFECE6D6" android:pathData="M30,24 L78,24 L78,84 L30,84 Z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M37,34 L71,34 L71,39 L37,39 Z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M37,45 L52,45 L52,50 L37,50 Z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M56,45 L71,45 L71,50 L56,50 Z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M37,56 L64,56 L64,61 L37,61 Z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M37,67 L48,67 L48,72 L37,72 Z" />
+    <path android:fillColor="#FFC8102E" android:pathData="M59,63 L65,63 L65,69 L71,69 L71,75 L65,75 L65,81 L59,81 L59,75 L53,75 L53,69 L59,69 Z" />
+</vector>

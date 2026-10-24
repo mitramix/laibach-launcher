@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Laibach TV: a set on a black disc, the cross on its screen. Original artwork. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF0A0A0A" android:pathData="M0,54a54,54 0 1,0 108,0a54,54 0 1,0 -108,0z" />
+    <path android:strokeColor="#FFECE6D6" android:strokeWidth="3" android:pathData="M42,22 L54,34 L66,22" />
+    <path android:fillColor="#FFECE6D6" android:pathData="M22,34 L86,34 L86,80 L22,80 Z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M28,40 L80,40 L80,74 L28,74 Z" />
+    <path android:fillColor="#FFC8102E" android:pathData="M50,44 L58,44 L58,53 L67,53 L67,61 L58,61 L58,70 L50,70 L50,61 L41,61 L41,53 L50,53 Z" />
+    <path android:fillColor="#FFECE6D6" android:pathData="M38,80 L44,88 L64,88 L70,80 Z" />
+</vector>

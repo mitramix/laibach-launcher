@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="dev.laibach.launcher"
+    android:versionCode="13"
+    android:versionName="2.4.1">
+
+    <uses-sdk android:minSdkVersion="31" android:targetSdkVersion="36" />
+
+    <!-- Lets the long-press menu open the system uninstall dialog. -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!-- Public order → dress the lock screen sets the lock screen's picture (never reads it). -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
+    <!-- The approved art of the day comes from the Volkskunst gallery on laibach.org. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- The attention ration reads the day's screen time, once the owner grants
+         usage access in Settings (Special app access → Usage access). -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
+    <!-- The top bar shows whether wifi and the VPN are up. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Opening the alarm list (tap on the clock) needs this. -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+
+    <!-- Reveille: the launcher's own alarm rings at an exact time, and is set again after a restart. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Morse taps for new decrees (off unless switched on in Public order). -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Package visibility: see every app that has a launcher entry. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:label="Laibach"
+        android:icon="@drawable/ic_launcher"
+        android:theme="@style/Home"
+        android:allowBackup="false">
+
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:stateNotNeeded="true"
+            android:clearTaskOnLaunch="true"
+            android:excludeFromRecents="true"
+            android:resumeWhilePausing="true"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- The owner's own pictures, framed (long-press the emblem → Volkskunst). -->
+        <activity
+            android:name=".VolkskunstActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale" />
+
+        <!-- Laibach TV, the state broadcaster: one YouTube channel and nothing else.
+             It is listed with the other programmes, so it has its own launcher entry. -->
+        <activity
+            android:name=".BroadcastActivity"
+            android:exported="true"
+            android:label="Laibach TV"
+            android:icon="@drawable/ic_tv"
+            android:taskAffinity="dev.laibach.launcher.tv"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Laibach Camera, the darkroom: its own icon, and "Submit to the censor" in the
+             share menu. It asks the phone's camera app for a photograph, so it needs no
+             camera permission and never sees the photo library. Public order → withdraw
+             the camera turns this entry off, icon and share menu together. -->
+        <activity
+            android:name=".DarkroomActivity"
+            android:exported="true"
+            android:label="Laibach Camera"
+            android:icon="@drawable/ic_camera"
+            android:taskAffinity="dev.laibach.launcher.darkroom"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter android:label="Submit to the censor">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
+
+        <!-- The censor's desk: "Submit to the censor" for text in the share menu. Names,
+             numbers, addresses and unsuitable words come back blacked out; nothing is kept.
+             No launcher icon. Public order → the censor's desk turns it off. -->
+        <activity
+            android:name=".CensorActivity"
+            android:exported="true"
+            android:label="Submit to the censor"
+            android:icon="@drawable/ic_censor"
+            android:taskAffinity="dev.laibach.launcher.censor"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+        <!-- Lends the camera app one file to write the photograph into, and the share
+             menu one print to read; nothing else. -->
+        <provider
+            android:name=".DarkroomProvider"
+            android:authorities="dev.laibach.launcher.darkroom"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <!-- The citizen's papers and permanent record (tap the papers line on the home screen). -->
+        <activity
+            android:name=".PapersActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale" />
+
+        <!-- The sealed terminal: shown in front of the phone's own lock screen when the
+             screen goes off. Its seal hands over to the phone's own lock (PIN, fingerprint). -->
+        <activity
+            android:name=".LockActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity="dev.laibach.launcher.lock"
+            android:excludeFromRecents="true"
+            android:noHistory="false"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale" />
+
+        <!-- Reveille: rings over the lock screen until the roll call is answered. -->
+        <activity
+            android:name=".AlarmActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity="dev.laibach.launcher.alarm"
+            android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale" />
+
+        <!-- Sets the reveille again after a restart, an update or a change of clock. -->
+        <receiver
+            android:name=".Alarm$Reschedule"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Quick-settings tiles: the curfew, the pacified display and the dressed lock screen. -->
+        <service
+            android:name=".Tiles$Curfew"
+            android:exported="true"
+            android:label="Curfew"
+            android:icon="@drawable/ic_tile_curfew"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".Tiles$Pacify"
+            android:exported="true"
+            android:label="Pacify"
+            android:icon="@drawable/ic_tile_pacify"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".Tiles$Dress"
+            android:exported="true"
+            android:label="Dress"
+            android:icon="@drawable/ic_tile_dress"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- Decrees: counts the waiting notifications per app, never their text.
+             Inactive until the owner grants notification access in Settings. -->
+        <service
+            android:name=".DecreeListener"
+            android:exported="true"
+            android:label="Laibach decrees"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

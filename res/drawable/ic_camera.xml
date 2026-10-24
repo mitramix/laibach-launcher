@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Laibach Camera: a box camera on a black disc, the cross in its lens. Original artwork. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF0A0A0A" android:pathData="M0,54a54,54 0 1,0 108,0a54,54 0 1,0 -108,0z" />
+    <path android:fillColor="#FFECE6D6" android:pathData="M40,30 L60,30 L64,37 L36,37 Z" />
+    <path android:fillColor="#FFECE6D6" android:pathData="M22,37 L86,37 L86,78 L22,78 Z" />
+    <path android:fillColor="#FF0A0A0A" android:pathData="M37,58a17,17 0 1,0 34,0a17,17 0 1,0 -34,0z" />
+    <path android:fillColor="#FFC8102E" android:pathData="M51,47 L57,47 L57,55 L65,55 L65,61 L57,61 L57,69 L51,69 L51,61 L43,61 L43,55 L51,55 Z" />
+    <path android:fillColor="#FFC8102E" android:pathData="M74,42 L81,42 L81,48 L74,48 Z" />
+</vector>
