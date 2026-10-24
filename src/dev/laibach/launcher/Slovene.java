@@ -729,6 +729,22 @@ final class Slovene {
         SL.put("FIRST ENTRY VISA", "PRVA VSTOPNA VIZA");
         SL.put("COMRADE REGISTERED", "TOVARIŠ REGISTRIRAN");
         SL.put("POSTER PRINTED", "PLAKAT NATISNJEN");
+
+        // 2.8.1: the permanent record, kept only when asked for.
+        SL.put("RECORD", "KARTOTEKA");
+        SL.put("Permanent record", "Stalna kartoteka");
+        SL.put("what you do in the launcher is noted in your papers; off, nothing is kept",
+                "kar počnete v zaganjalniku, je zabeleženo v vaših dokumentih; izklopljeno se nič ne hrani");
+        SL.put("NOT KEPT", "SE NE VODI");
+        SL.put("THE RECORD IS NOT KEPT. NOTHING YOU DO IN THE LAUNCHER IS WRITTEN DOWN.",
+                "KARTOTEKA SE NE VODI. NIČ, KAR POČNETE V ZAGANJALNIKU, SE NE ZAPIŠE.");
+        SL.put("KEEP THE RECORD", "VODI KARTOTEKO");
+        SL.put("The record is kept. It stays on this phone.", "Kartoteka se vodi. Ostane na tem telefonu.");
+        SL.put("Close the record?", "Zaprem kartoteko?");
+        SL.put("Its entries are destroyed and nothing more is written down.",
+                "Njeni vnosi bodo uničeni in nič več se ne bo zapisovalo.");
+        SL.put("Close it", "Zapri");
+        SL.put("The record is closed. Nothing is kept.", "Kartoteka je zaprta. Nič se ne hrani.");
     }
 
     private Slovene() {}

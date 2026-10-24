@@ -142,6 +142,9 @@ final class Orders extends HomePart {
             case 36:
                 home.drills.edit();
                 return true;
+            case 37:
+                keepRecord(!Record.on(home));
+                return true;
             case 22:
                 Morse.setOn(home, !Morse.on(home));
                 if (Morse.on(home)) Morse.tap(home, true);
@@ -360,5 +363,28 @@ final class Orders extends HomePart {
                     Toast.LENGTH_LONG).show();
             home.regulations.refresh();
         });
+    }
+
+    /** Opens the permanent record, or closes it after asking: closed, its entries are destroyed. */
+    private void keepRecord(boolean on) {
+        if (on) {
+            Record.setOn(home, true);
+            Record.note(home, "PERMANENT RECORD OPENED. FROM NOW ON, EVERYTHING IS NOTED.",
+                    "STÄNDIGE AKTE ANGELEGT. AB JETZT WIRD ALLES VERMERKT.");
+            Tones.play(home, Tones.stamp());
+            toast(t("The record is kept. It stays on this phone.", "Die Akte wird geführt. Sie bleibt auf diesem Telefon."));
+            return;
+        }
+        StateMenu.dress(new android.app.AlertDialog.Builder(home, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                .setTitle(t("Close the record?", "Die Akte schließen?"))
+                .setMessage(t("Its entries are destroyed and nothing more is written down.",
+                        "Ihre Einträge werden vernichtet, und nichts wird mehr aufgeschrieben."))
+                .setPositiveButton(t("Close it", "Schließen"), (d, w) -> {
+                    Record.setOn(home, false);
+                    toast(t("The record is closed. Nothing is kept.", "Die Akte ist geschlossen. Nichts wird aufbewahrt."));
+                    home.regulations.refresh();
+                })
+                .setNegativeButton(t("Cancel", "Abbrechen"), null)
+                .show(), v);
     }
 }

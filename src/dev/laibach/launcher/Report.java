@@ -103,7 +103,8 @@ final class Report {
                 // An entry without a time is not counted.
             }
         }
-        out.add(t(german, "NEW RECORD ENTRIES: ", "NEUE AKTENEINTRÄGE: ") + noted);
+        out.add(t(german, "NEW RECORD ENTRIES: ", "NEUE AKTENEINTRÄGE: ")
+                + (Record.on(c) ? String.valueOf(noted) : t(german, "NOT KEPT", "NICHT GEFÜHRT")));
         out.add(t(german, "CURFEW: ", "SPERRSTUNDE: ") + (Citizen.curfewOn(c)
                 ? t(german, "IN FORCE, 23:00–06:00", "IN KRAFT, 23:00–06:00")
                 : t(german, "SUSPENDED", "AUSGESETZT")));

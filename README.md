@@ -597,12 +597,22 @@ coupon** for the day. A terminal founded on 29 February observes the day on
 
 ### ■ The permanent record
 
-The state notes what the citizen does in the launcher: transfers,
+**Off until the citizen asks for it.** Turn it on with **Settings →
+Permanent record** or **Keep the record** in the papers. Until then nothing
+is written down, the papers say `THE RECORD IS NOT KEPT`, and the
+statistics, the weekly report and the case file show the record as `NOT
+KEPT`.
+
+Once kept, the state notes what the citizen does in the launcher: transfers,
 banishments, redactions, changes of uniform and language, curfew exemptions
 and drills, decrees obeyed, joy spent and roll calls. The record keeps the
 last 100 entries, in the preferences file `record`. **Hold** `HOLD TO DELETE
 THE RECORD` to empty it. One entry remains: `RECORD DELETED. THE DELETION HAS
-BEEN NOTED.`
+BEEN NOTED.` Turning the record off again, after a confirmation, destroys
+every entry.
+
+Wherever this README says something is noted on the record, it is noted
+only while the record is kept.
 
 ### ■ The Constitution
 
@@ -1055,8 +1065,8 @@ follow the Slovenian locale.
 
 ## 🔒 XIII. WHAT THE STATE DOES NOT SEE
 
-The state notes everything the citizen does *in the launcher*. It does not
-look further.
+Only if the citizen asks it to keep the permanent record does the state note
+what they do *in the launcher*. It never looks further.
 
 > [!NOTE]
 > - **Usage.** The ration, the quotas and the informant read Android's own
@@ -1106,6 +1116,7 @@ The state was built in stages. Each stage was fulfilled ahead of schedule.
 | **2.6** | The Record | The exit visa for every redaction and banishment, ceremonies for promotions and attendance, Foundation Day with its extra joy coupon, the stamp album, and the identity card shared as a specimen. |
 | **2.7** | The Weather | Controlled weather from the sun's true position, worked out from the clock alone; a five-minute curfew warning; the dead drop; the anthem of the hour; and the typewriter at the censor's desk. |
 | **2.8** | The Exchange | The drill schedule, the passport and its entry visas, the citizen exchange by QR code, and the poster press. |
+| **2.8.1** | — | The permanent record is off until the citizen turns it on. A record kept by an earlier issue is destroyed when 2.8.1 first starts. |
 
 <details>
 <summary><b>🔍 Findings of the inspectorate</b></summary>

@@ -250,6 +250,7 @@ public class HomeActivity extends StateActivity {
         IntentFilter onOff = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         onOff.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(screen, onOff, RECEIVER_NOT_EXPORTED);
+        Record.forgetIfClosed(this);
         passport = Passport.watch(this);
         LockActivity.onUnseal = () -> {
             if (!visible) awaySince = System.currentTimeMillis();

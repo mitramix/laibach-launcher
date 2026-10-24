@@ -129,7 +129,7 @@ public class PapersActivity extends StateActivity {
         figures(t("EXEMPTIONS", "AUSNAHMEN"), String.valueOf(Citizen.exemptions(this)),
                 t("JOY COUPONS", "FREUDENMARKEN"), Citizen.joyLeft(this) + " / " + Citizen.coupons(this));
         figures(t("SELF-CRITICISMS", "SELBSTKRITIKEN"), String.valueOf(Citizen.confessions(this)),
-                t("RECORD ENTRIES", "AKTENEINTRÄGE"), String.valueOf(Record.entries(this).size()));
+                t("RECORD ENTRIES", "AKTENEINTRÄGE"), Record.on(this) ? String.valueOf(Record.entries(this).size()) : t("NOT KEPT", "NICHT GEFÜHRT"));
         figures(t("DEFECTIONS", "REPUBLIKFLUCHTEN"), String.valueOf(ExitVisa.issued(this)),
                 t("STAMPS", "MARKEN"), Stamps.count(this) + " / " + Stamps.ALL.length);
         figures(t("ENTRY VISAS", "EINREISEVISA"), String.valueOf(Passport.count(this)),
@@ -199,9 +199,25 @@ public class PapersActivity extends StateActivity {
         where.setPadding(0, dp(10), 0, 0);
         content.addView(where);
 
-        // The permanent record, newest first.
+        // The permanent record, newest first, if the owner keeps one.
         List<String[]> entries = Record.entries(this);
         heading(t("PERMANENT RECORD", "STÄNDIGE AKTE"));
+        if (!Record.on(this)) {
+            TextView closed = serif(13, v.muted);
+            closed.setText(t("THE RECORD IS NOT KEPT. NOTHING YOU DO IN THE LAUNCHER IS WRITTEN DOWN.",
+                    "DIE AKTE WIRD NICHT GEFÜHRT. NICHTS, WAS SIE IM LAUNCHER TUN, WIRD AUFGESCHRIEBEN."));
+            content.addView(closed);
+            TextView keep = button(t("KEEP THE RECORD", "DIE AKTE FÜHREN"), view -> {
+                Record.setOn(this, true);
+                Record.note(this, "PERMANENT RECORD OPENED. FROM NOW ON, EVERYTHING IS NOTED.",
+                        "STÄNDIGE AKTE ANGELEGT. AB JETZT WIRD ALLES VERMERKT.");
+                fill();
+            });
+            LinearLayout.LayoutParams lp = fullWidth();
+            lp.topMargin = dp(20);
+            content.addView(keep, lp);
+            return;
+        }
         if (entries.isEmpty()) {
             TextView none = serif(13, v.muted);
             none.setText(t("NOTHING HAS BEEN RECORDED. THIS IS SUSPICIOUS.",

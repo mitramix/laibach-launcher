@@ -117,6 +117,12 @@ final class Regulations extends HomePart {
             });
         }
 
+        section(page, t("RECORD", "AKTE"));
+        toggle(page, t("Permanent record", "Ständige Akte"),
+                t("what you do in the launcher is noted in your papers; off, nothing is kept",
+                        "was Sie im Launcher tun, wird in Ihren Papieren vermerkt; aus, wird nichts aufbewahrt"),
+                Record.on(home), 37);
+
         section(page, t("DEAD DROP", "TOTER BRIEFKASTEN"));
         boolean dropped = !DeadDrop.note(home).isEmpty();
         line(page, t("Sealed note", "Versiegelte Notiz"), t("a note of your own on the home screen, blacked out; hold it to read it",

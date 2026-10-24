@@ -173,7 +173,8 @@ final class Exports {
         for (String line : Report.lines(c, german)) pdf.text(line, 10, false, Pdf.INK);
         pdf.gap(14);
         List<String[]> entries = Record.entries(c);
-        pdf.heading(t(german, "PERMANENT RECORD", "STÄNDIGE AKTE") + " (" + entries.size() + ")");
+        pdf.heading(t(german, "PERMANENT RECORD", "STÄNDIGE AKTE") + " ("
+                + (Record.on(c) ? String.valueOf(entries.size()) : t(german, "NOT KEPT", "NICHT GEFÜHRT")) + ")");
         SimpleDateFormat when = new SimpleDateFormat(t(german, "d MMM yyyy HH:mm", "d. MMM yyyy HH:mm"), locale);
         for (String[] e : entries) {
             String time;
