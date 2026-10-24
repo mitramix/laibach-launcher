@@ -132,6 +132,10 @@ public class HomeActivity extends StateActivity {
     /** The curfew and the roll call that cover the screen; made with the rest of it. */
     Curfew curfew;
     RollCall rollCall;
+    /** The drills the owner has scheduled, called by the roll call. */
+    Drills drills;
+    /** The passport's watch on the border, kept while the home screen lives. */
+    Passport passport;
     boolean visible;
     /** When the home screen went out of sight with the screen on; 0 when it did not. */
     long awaySince;
@@ -246,6 +250,7 @@ public class HomeActivity extends StateActivity {
         IntentFilter onOff = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         onOff.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(screen, onOff, RECEIVER_NOT_EXPORTED);
+        passport = Passport.watch(this);
         LockActivity.onUnseal = () -> {
             if (!visible) awaySince = System.currentTimeMillis();
         };
@@ -355,6 +360,7 @@ public class HomeActivity extends StateActivity {
     protected void onDestroy() {
         launcherApps.unregisterCallback(appsChanged);
         unregisterReceiver(screen);
+        passport.stop();
         LockActivity.onUnseal = null;
         DecreeListener.clearOnChange(decreesChanged);
         super.onDestroy();
@@ -394,6 +400,7 @@ public class HomeActivity extends StateActivity {
         buildMonument();
         buildRegister(root);
         buildCommand(root);
+        drills = new Drills(this);
         rollCall = new RollCall(this);
         frame.addView(rollCall.build());
         curfew = new Curfew(this);

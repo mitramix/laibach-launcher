@@ -2,8 +2,6 @@ package dev.laibach.launcher;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ClipData;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -134,6 +132,8 @@ public class PapersActivity extends StateActivity {
                 t("RECORD ENTRIES", "AKTENEINTRÄGE"), String.valueOf(Record.entries(this).size()));
         figures(t("DEFECTIONS", "REPUBLIKFLUCHTEN"), String.valueOf(ExitVisa.issued(this)),
                 t("STAMPS", "MARKEN"), Stamps.count(this) + " / " + Stamps.ALL.length);
+        figures(t("ENTRY VISAS", "EINREISEVISA"), String.valueOf(Passport.count(this)),
+                t("COMRADES", "GENOSSEN"), String.valueOf(ExchangeActivity.comrades(this).size()));
         // Harmony is always nearly perfect; the norm is always exceeded.
         int seed = Norm.seed(year * 1000L + day);
         figures(t("COLLECTIVE HARMONY", "KOLLEKTIVE HARMONIE"),
@@ -141,7 +141,9 @@ public class PapersActivity extends StateActivity {
                 t("NORM FULFILMENT", "NORMERFÜLLUNG"), Norm.today(this) + "%");
 
         quotas();
+        drills();
         album();
+        passport();
 
         // The article of the day; tap for the whole constitution.
         heading(t("ARTICLE OF THE DAY", "ARTIKEL DES TAGES"));
@@ -176,6 +178,8 @@ public class PapersActivity extends StateActivity {
         heading(t("THE COUNTER", "DER SCHALTER"));
         content.addView(button(t("CHECK A CITIZEN NUMBER", "BÜRGERNUMMER PRÜFEN"), view -> NumberCheck.show(this, v)),
                 fullWidth());
+        content.addView(button(t("REGISTER A COMRADE", "EINEN GENOSSEN REGISTRIEREN"),
+                view -> startActivity(new Intent(this, ExchangeActivity.class))), spaced());
 
         // Papers that leave the launcher.
         heading(t("PAPERS FOR EXPORT", "PAPIERE ZUR AUSFUHR"));
@@ -431,16 +435,46 @@ public class PapersActivity extends StateActivity {
         }
         Record.note(this, "CITIZEN CARD SHARED AS A SPECIMEN. IT CONFERS NO RIGHTS.",
                 "BÜRGERAUSWEIS ALS MUSTER GETEILT. ER VERLEIHT KEINE RECHTE.");
-        Intent send = new Intent(Intent.ACTION_SEND);
-        send.setType("image/jpeg");
-        send.putExtra(Intent.EXTRA_STREAM, uri);
-        send.setClipData(ClipData.newRawUri("", uri));
-        send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Intent chooser = Intent.createChooser(send, t("SHARE THE SPECIMEN", "DAS MUSTER TEILEN"));
-        // The state's own desks would only censor or develop the card again.
-        chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, new ComponentName[]{
-                new ComponentName(this, CensorActivity.class), new ComponentName(this, DarkroomActivity.class)});
-        startActivity(chooser);
+        Exports.send(this, uri, t("SHARE THE SPECIMEN", "DAS MUSTER TEILEN"));
+    }
+
+    /** The day's drills, each with its answer; left out while none is scheduled. */
+    private void drills() {
+        int[] times = Drills.times(this);
+        if (times.length == 0) return;
+        heading(t("DRILL SCHEDULE", "ÜBUNGSPLAN"));
+        for (int at : times) {
+            char answer = Drills.answer(this, at);
+            String state = answer == Drills.PRESENT ? t("PRESENT", "ANWESEND")
+                    : answer == Drills.ABSENT ? t("ABSENT", "ABWESEND")
+                    : Drills.called(this, at) ? t("MISSED", "VERSÄUMT") : t("PENDING", "AUSSTEHEND");
+            LinearLayout r = row();
+            r.setPadding(0, 0, 0, dp(6));
+            TextView hour = type(15, v.ink, 25, 850);
+            hour.setText(Drills.time(at));
+            r.addView(hour, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            TextView mark = type(11, answer == Drills.PRESENT ? v.accent : v.muted, 80, 850);
+            mark.setText(state);
+            mark.setLetterSpacing(0.18f);
+            r.addView(mark);
+            content.addView(r);
+        }
+    }
+
+    /** The passport's latest page: the entry visas, newest first. The networks are never named. */
+    private void passport() {
+        heading(t("PASSPORT", "REISEPASS"));
+        TextView note = type(11, v.muted, 80, 650);
+        int n = Passport.count(this);
+        note.setText(n == 0
+                ? t("NO ENTRY VISAS YET. EACH WI-FI NETWORK THE PHONE ENTERS EARNS ONE; NONE IS NAMED.",
+                        "NOCH KEINE EINREISEVISA. JEDES WLAN, DAS DAS TELEFON BETRITT, BRINGT EINES; KEINES WIRD GENANNT.")
+                : String.format(locale, t("ENTRY VISAS STAMPED: %d. ONLY THE DATES ARE KEPT; THE NETWORKS ARE NEVER NAMED.",
+                        "GESTEMPELTE EINREISEVISA: %d. NUR DIE DATEN WERDEN AUFBEWAHRT; DIE NETZE WERDEN NIE GENANNT."), n));
+        note.setLetterSpacing(0.1f);
+        note.setPadding(0, 0, 0, dp(10));
+        content.addView(note);
+        if (n > 0) content.addView(new Passport.Page(this, v, german), fullWidth());
     }
 
     /** The stamp album: every stamp the state issues, three to a row, the missing ones in outline. */

@@ -38,6 +38,10 @@ final class Stamps {
             new Stamp("darkroom", "PRINT DEVELOPED", "ABZUG ENTWICKELT", StampArt.SUN),
             new Stamp("report", "WEEKLY REPORT READ", "WOCHENBERICHT GELESEN", StampArt.GEAR),
             new Stamp("foundation", "FOUNDATION DAY", "GRÜNDUNGSTAG", StampArt.EMBLEM),
+            new Stamp("schedule", "DRILL ANSWERED", "ÜBUNG BEANTWORTET", StampArt.CLOCK),
+            new Stamp("passport", "FIRST ENTRY VISA", "ERSTES EINREISEVISUM", StampArt.WAVES),
+            new Stamp("comrade", "COMRADE REGISTERED", "GENOSSE REGISTRIERT", StampArt.LINK),
+            new Stamp("poster", "POSTER PRINTED", "PLAKAT GEDRUCKT", StampArt.FLAG),
     };
 
     private Stamps() {}

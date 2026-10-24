@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dev.laibach.launcher"
-    android:versionCode="17"
-    android:versionName="2.7.0">
+    android:versionCode="18"
+    android:versionName="2.8.0">
 
     <uses-sdk android:minSdkVersion="31" android:targetSdkVersion="36" />
 
@@ -141,6 +141,22 @@
             android:exported="false"
             android:excludeFromRecents="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale" />
+
+        <!-- The citizen exchange: shows the owner's papers as a QR code, and opens when another
+             phone's camera reads a comrade's laibach://comrade/ link. Only the number travels. -->
+        <activity
+            android:name=".ExchangeActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="dev.laibach.launcher.exchange"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="laibach" android:host="comrade" />
+            </intent-filter>
+        </activity>
 
         <!-- The sealed terminal: shown in front of the phone's own lock screen when the
              screen goes off. Its seal hands over to the phone's own lock (PIN, fingerprint). -->

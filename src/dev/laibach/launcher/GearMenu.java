@@ -43,6 +43,7 @@ final class GearMenu extends HomePart {
         SubMenu art = menu.addSubMenu(0, 0, 0, camera ? t("Art & camera", "Kunst & Kamera") : t("Art", "Kunst"));
         art.add(0, 5, 0, t("Volkskunst (your art)", "Volkskunst (Ihre Kunst)"));
         art.add(0, 6, 1, t("Next approved artwork", "Nächstes genehmigtes Kunstwerk"));
+        art.add(0, 34, 1, t("Poster press", "Plakatpresse"));
         if (camera) art.add(0, 23, 2, t("Laibach Camera (the darkroom)", "Laibach-Kamera (die Dunkelkammer)"));
         SubMenu duties = menu.addSubMenu(0, 0, 0, t("Duties (mobilise, roll call, drill)", "Pflichten (Mobilisierung, Appell, Übung)"));
         long until = Citizen.mobilisedUntil(home);
@@ -55,6 +56,8 @@ final class GearMenu extends HomePart {
         if (until > 0) mobilise.add(0, 44, 3, t("Stand down now", "Jetzt demobilisieren"));
         duties.add(0, 14, 1, t("Report for roll call", "Zum Appell melden"));
         duties.add(0, 10, 2, t("Curfew drill", "Sperrstundenübung"));
+        duties.add(0, 36, 3, t("Drill schedule", "Übungsplan"));
+        menu.add(0, 35, 0, t("Citizen exchange (register a comrade)", "Bürgeraustausch (einen Genossen registrieren)"));
         menu.add(0, 1, 0, home.showHidden ? t("Hide redacted", "Geschwärzte verbergen") : t("Show redacted", "Geschwärzte zeigen"));
         menu.add(0, 4, 0, t("Settings", "Einstellungen"));
         StateMenu.show(anchor, v, "LAIBACH LIFE™", menu, Gravity.START, item -> home.orders.act(item.getItemId()));

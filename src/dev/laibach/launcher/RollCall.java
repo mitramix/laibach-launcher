@@ -11,12 +11,17 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/** The morning roll call: once a day after 06:00 the citizen reports present. */
+/**
+ * The morning roll call: once a day after 06:00 the citizen reports present.
+ * The drills the owner schedules are called on the same form at their hours.
+ */
 final class RollCall extends HomePart {
     View view;
-    TextView streak;
+    TextView streak, head;
     /** The roll call was summoned from the menu rather than by the morning. */
     boolean summoned;
+    /** The drill being called, as minutes of the day; -1 while it is the morning's roll call or none. */
+    int drill = -1;
 
     RollCall(HomeActivity home) {
         super(home);
@@ -46,8 +51,7 @@ final class RollCall extends HomePart {
         LinearLayout middle = column();
         middle.setGravity(Gravity.CENTER);
         middle.addView(new EmblemView(home, v), new LinearLayout.LayoutParams(dp(96), dp(96)));
-        TextView head = glitch(34, v.ink, 25, 1000);
-        head.setText(t("MORNING\nROLL CALL", "MORGEN-\nAPPELL"));
+        head = glitch(34, v.ink, 25, 1000);
         head.setGravity(Gravity.CENTER);
         head.setLetterSpacing(0.12f);
         head.setPadding(0, dp(28), 0, dp(12));
@@ -97,9 +101,18 @@ final class RollCall extends HomePart {
     }
 
     void update() {
-        boolean on = (summoned || Citizen.rollCallDue(home)) && !home.curfew.showing();
+        boolean morning = summoned || Citizen.rollCallDue(home);
+        drill = morning ? -1 : Drills.due(home);
+        boolean on = (morning || drill >= 0) && !home.curfew.showing();
         view.setVisibility(on ? View.VISIBLE : View.GONE);
         if (!on) return;
+        if (drill >= 0) {
+            head.setText(t("DRILL\n", "ÜBUNG\n") + Drills.time(drill));
+            streak.setText(String.format(locale, t("DRILLS TODAY: %d OF %d ANSWERED PRESENT", "ÜBUNGEN HEUTE: %d VON %d ANWESEND"),
+                    Drills.present(home), Drills.times(home).length));
+            return;
+        }
+        head.setText(t("MORNING\nROLL CALL", "MORGEN-\nAPPELL"));
         int days = Citizen.streak(home);
         streak.setText(days == 0
                 ? t("ATTENDANCE: NO RECORD OF YOU YET. THIS CAN BE CORRECTED.",
@@ -108,6 +121,10 @@ final class RollCall extends HomePart {
     }
 
     void answer(boolean present) {
+        if (drill >= 0) {
+            answerDrill(present);
+            return;
+        }
         Citizen.answerRollCall(home, present);
         summoned = false;
         String time = new SimpleDateFormat("HH:mm", locale).format(new Date());
@@ -124,6 +141,27 @@ final class RollCall extends HomePart {
                     "APPELL " + time + ": GEISTIG ABWESEND. ANWESENHEIT ZURÜCKGESETZT.");
             toast(t("Absence noted. Your attendance begins again tomorrow.",
                     "Abwesenheit vermerkt. Ihre Anwesenheit beginnt morgen von vorn."));
+        }
+        update();
+    }
+
+    /** A drill is answered like the roll call, but an absence does not end the attendance. */
+    private void answerDrill(boolean present) {
+        int at = drill;
+        Drills.answer(home, at, present);
+        int done = Drills.present(home), of = Drills.times(home).length;
+        String time = Drills.time(at);
+        if (present) {
+            Record.note(home, "DRILL " + time + ": PRESENT. " + done + " OF " + of + " DRILLS ANSWERED PRESENT TODAY.",
+                    "ÜBUNG " + time + ": ANWESEND. " + done + " VON " + of + " ÜBUNGEN HEUTE ANWESEND.");
+            Tones.play(home, Tones.stamp());
+            toast(String.format(locale, t("Drill answered. %d of %d today.", "Übung beantwortet. %d von %d heute."), done, of));
+            Stamps.award(home, "schedule");
+        } else {
+            Record.note(home, "DRILL " + time + ": ABSENT. THE ABSENCE IS FILED WITH THE OTHERS.",
+                    "ÜBUNG " + time + ": ABWESEND. DIE ABWESENHEIT WIRD ZU DEN ANDEREN GELEGT.");
+            toast(t("Absence from the drill noted. The attendance stands.",
+                    "Abwesenheit von der Übung vermerkt. Die Anwesenheit bleibt bestehen."));
         }
         update();
     }

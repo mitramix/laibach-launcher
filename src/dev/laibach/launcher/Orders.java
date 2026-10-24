@@ -56,7 +56,7 @@ final class Orders extends HomePart {
             case 32: {
                 String to = id == 31 ? Variant.WEEKLY : id == 32 ? Variant.WEEKDAY : "";
                 Variant.setPlan(home, to);
-                Record.note(home, to.isEmpty() ? "FIVE-YEAR PLAN SUSPENDED. THE CITIZEN DRESSES HIMSELF."
+                Record.note(home, to.isEmpty() ? "FIVE-YEAR PLAN SUSPENDED. THE CITIZEN DRESSES UNSUPERVISED."
                                 : "FIVE-YEAR PLAN ADOPTED: THE UNIFORM IS ISSUED BY THE CALENDAR.",
                         to.isEmpty() ? "FÜNFJAHRESPLAN AUSGESETZT. DER BÜRGER KLEIDET SICH SELBST."
                                 : "FÜNFJAHRESPLAN ANGENOMMEN: DIE UNIFORM GIBT DER KALENDER AUS.");
@@ -91,7 +91,7 @@ final class Orders extends HomePart {
                 return true;
             case 54:
                 Alarm.set(home, -1);
-                Record.note(home, "REVEILLE CANCELLED. THE CITIZEN WAKES BY HIMSELF.",
+                Record.note(home, "REVEILLE CANCELLED. THE CITIZEN WAKES UNASSISTED.",
                         "WECKRUF AUFGEHOBEN. DER BÜRGER ERWACHT VON SELBST.");
                 return true;
             case 23:
@@ -132,6 +132,15 @@ final class Orders extends HomePart {
                 return true;
             case 33:
                 home.deadDrop.edit();
+                return true;
+            case 34:
+                PosterPress.show(home);
+                return true;
+            case 35:
+                home.startActivity(new Intent(home, ExchangeActivity.class));
+                return true;
+            case 36:
+                home.drills.edit();
                 return true;
             case 22:
                 Morse.setOn(home, !Morse.on(home));

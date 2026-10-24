@@ -15,7 +15,7 @@ import android.view.View;
  */
 final class StampArt {
     static final int CHECK = 0, SEVEN = 1, THIRTY = 2, EYE = 3, STAR = 4, MOON = 5, KEY = 6, CROSS = 7,
-            ARROW = 8, BARS = 9, SUN = 10, GEAR = 11, EMBLEM = 12;
+            ARROW = 8, BARS = 9, SUN = 10, GEAR = 11, EMBLEM = 12, CLOCK = 13, WAVES = 14, LINK = 15, FLAG = 16;
 
     private StampArt() {}
 
@@ -103,6 +103,36 @@ final class StampArt {
                 Cyber.gear(p, cx, cy, r * 0.9f);
                 p.addCircle(cx, cy, r * 0.3f, Path.Direction.CCW);
                 p.setFillType(Path.FillType.EVEN_ODD);
+                c.drawPath(p, fill);
+                break;
+            case CLOCK:
+                stroke.setStrokeWidth(r * 0.12f);
+                c.drawCircle(cx, cy, r * 0.78f, stroke);
+                c.drawLine(cx, cy, cx, cy - r * 0.5f, stroke);
+                c.drawLine(cx, cy, cx + r * 0.38f, cy, stroke);
+                break;
+            case WAVES:
+                // The signal the passport answers to, never its name: three arcs and their source.
+                stroke.setStrokeWidth(r * 0.12f);
+                stroke.setStrokeCap(Paint.Cap.ROUND);
+                for (int i = 1; i <= 3; i++) {
+                    float a = r * 0.3f * i;
+                    c.drawArc(cx - a, cy + r * 0.45f - a, cx + a, cy + r * 0.45f + a, 225, 90, false, stroke);
+                }
+                c.drawCircle(cx, cy + r * 0.45f, r * 0.12f, fill);
+                break;
+            case LINK:
+                stroke.setStrokeWidth(r * 0.13f);
+                c.drawCircle(cx - r * 0.3f, cy, r * 0.45f, stroke);
+                c.drawCircle(cx + r * 0.3f, cy, r * 0.45f, stroke);
+                break;
+            case FLAG:
+                stroke.setStrokeWidth(r * 0.12f);
+                c.drawLine(cx - r * 0.6f, cy - r * 0.85f, cx - r * 0.6f, cy + r * 0.85f, stroke);
+                p.moveTo(cx - r * 0.6f, cy - r * 0.8f);
+                p.lineTo(cx + r * 0.8f, cy - r * 0.5f);
+                p.lineTo(cx - r * 0.6f, cy - r * 0.1f);
+                p.close();
                 c.drawPath(p, fill);
                 break;
             default:

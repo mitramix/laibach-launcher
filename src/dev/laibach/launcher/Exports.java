@@ -1,8 +1,12 @@
 package dev.laibach.launcher;
 
+import android.app.Activity;
+import android.content.ClipData;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -47,7 +51,8 @@ final class Exports {
     static final String FOLDER = "Laibach";
     private static final String SETTINGS_PREFIX = "laibach-settings-";
     /** The preference files a backup carries; caches and chosen pictures stay behind. */
-    private static final String[] BACKED_UP = {Variant.PREFS, "citizen", "record", "ministries", "tv", "stamps", "visas"};
+    private static final String[] BACKED_UP = {Variant.PREFS, "citizen", "record", "ministries", "tv", "stamps", "visas",
+            "drills", "passport", "comrades"};
 
     private Exports() {}
 
@@ -61,14 +66,19 @@ final class Exports {
     static boolean saveCard(Context c, View card, Variant v) {
         Bitmap bmp = specimen(c, card, v);
         if (bmp == null) return false;
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.MediaColumns.DISPLAY_NAME, "laibach-citizen-card-" + stamp() + ".png");
-        values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
-        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + FOLDER);
-        boolean ok = write(c, MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values,
-                out -> bmp.compress(Bitmap.CompressFormat.PNG, 100, out));
+        boolean ok = savePicture(c, bmp, "laibach-citizen-card-");
         bmp.recycle();
         return ok;
+    }
+
+    /** Saves a picture to Pictures/Laibach as a PNG, its name the prefix and the minute. */
+    static boolean savePicture(Context c, Bitmap bmp, String prefix) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, prefix + stamp() + ".png");
+        values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
+        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + FOLDER);
+        return write(c, MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values,
+                out -> bmp.compress(Bitmap.CompressFormat.PNG, 100, out));
     }
 
     /**
@@ -79,16 +89,35 @@ final class Exports {
     static Uri shareCard(Context c, View card, Variant v) {
         Bitmap bmp = specimen(c, card, v);
         if (bmp == null) return null;
+        Uri uri = lend(c, bmp, "card-");
+        bmp.recycle();
+        return uri;
+    }
+
+    /** A picture as a JPEG in the darkroom's cache, for the share menu: the uri to lend, or null. */
+    static Uri lend(Context c, Bitmap bmp, String prefix) {
         DarkroomProvider.sweep(c);
-        String name = "card-" + System.currentTimeMillis() + ".jpg";
+        String name = prefix + System.currentTimeMillis() + ".jpg";
         boolean ok;
         try (OutputStream out = new FileOutputStream(new File(DarkroomProvider.dir(c), name))) {
             ok = bmp.compress(Bitmap.CompressFormat.JPEG, 92, out);
         } catch (IOException e) {
             ok = false;
         }
-        bmp.recycle();
         return ok ? DarkroomProvider.uri(name) : null;
+    }
+
+    /** Offers a lent picture to the share menu, past the state's own desks, which would only take it in again. */
+    static void send(Activity a, Uri uri, String title) {
+        Intent send = new Intent(Intent.ACTION_SEND);
+        send.setType("image/jpeg");
+        send.putExtra(Intent.EXTRA_STREAM, uri);
+        send.setClipData(ClipData.newRawUri("", uri));
+        send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent chooser = Intent.createChooser(send, title);
+        chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, new ComponentName[]{
+                new ComponentName(a, CensorActivity.class), new ComponentName(a, DarkroomActivity.class)});
+        a.startActivity(chooser);
     }
 
     /** The card drawn as it is shown, with SPECIMEN printed across it and along its foot. */

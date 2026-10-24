@@ -93,6 +93,12 @@ final class Regulations extends HomePart {
                 t("a ministry closes for inventory once its daily allowance is spent; needs usage access",
                         "ein Ministerium schließt wegen Inventur, wenn seine Tageszuteilung verbraucht ist; braucht Nutzungszugriff"),
                 Quotas.on(home), 27);
+        int[] drills = Drills.times(home);
+        StringBuilder hours = new StringBuilder();
+        for (int d : drills) hours.append(hours.length() > 0 ? " · " : "").append(Drills.time(d));
+        line(page, t("Drill schedule", "Übungsplan"), t("roll calls at your own hours, answered present or absent",
+                        "Appelle zu Ihren eigenen Stunden, beantwortet mit anwesend oder abwesend"),
+                drills.length == 0 ? t("OFF", "AUS") : hours.toString(), drills.length > 0, x -> home.orders.act(36));
         int alarm = Alarm.minutes(home);
         line(page, t("Reveille", "Weckruf"), t("the state's alarm; tap to set the time",
                         "der Wecker des Staates; tippen, um die Zeit festzulegen"),

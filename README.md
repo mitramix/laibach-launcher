@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/VERSION-2.7%20THE%20WEATHER-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.7, The Weather">
+  <img src="https://img.shields.io/badge/VERSION-2.8%20THE%20EXCHANGE-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.8, The Exchange">
   <img src="https://img.shields.io/badge/ANDROID-12%2B-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Android 12 or later">
   <img src="https://img.shields.io/badge/SIZE-~247%20KB-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="About 247 KB">
   <img src="https://img.shields.io/badge/LIBRARIES-NONE-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="No libraries">
@@ -68,7 +68,7 @@ default.
 | | |
 |---|---|
 | **Package** | `dev.laibach.launcher` |
-| **Version** | 2.7, *The Weather* |
+| **Version** | 2.8, *The Exchange* |
 | **Source** | 74 Java files, no libraries, no Gradle |
 | **Size** | about 247 KB |
 | **Requires** | Android 12 (API 31) or later |
@@ -551,8 +551,10 @@ Tap the papers row on the terminal (citizen number and standing), or go to
   change daily. Both are invented.
 - **Ministry quotas**: what each ministry has spent today against its
   allowance (see [Ministry quotas](#-ministry-quotas)).
-- **The stamp album**, described below. The statistics also count stamps
-  and defections.
+- **The stamp album**, described below. The statistics also count stamps,
+  defections, entry visas and comrades.
+- **The drill schedule**: today's drills and how each was answered.
+- **The passport**: the latest entry visas, described below.
 - **The counter.** **Check a citizen number** takes any 21-digit number and
   checks its Damm digit: `VALID` or `FORGED`. One mistyped digit, or two
   neighbours swapped, is always caught. The citizen's own number is
@@ -567,11 +569,12 @@ Tap the papers row on the terminal (citizen number and standing), or go to
 
 ### ■ The stamp album
 
-Thirteen stamps, each for a first deed the state wishes to see again: the
+Seventeen stamps, each for a first deed the state wishes to see again: the
 first roll call, 7 and 30 days present, the first confession, a promotion, a
 curfew drill, checking one's own papers, a forgery confiscated, an exit
-visa, a text censored, a print developed, a weekly report read, and
-Foundation Day. Stamps not yet issued are drawn in outline. An issued stamp
+visa, a text censored, a print developed, a weekly report read, Foundation
+Day, a drill answered, the first entry visa, a comrade registered and a
+poster printed. Stamps not yet issued are drawn in outline. An issued stamp
 bears its date. Tap it to see it awarded again. The album keeps only the
 date of each stamp, in the preferences file `stamps`.
 
@@ -622,6 +625,41 @@ The first time the terminal is shown after 06:00, it is covered by `MORNING
 ROLL CALL` until the citizen presses **PRESENT**. Each day answered extends
 the attendance streak. Back counts as absence and resets the streak. **Menu →
 Duties → Report for roll call** summons it at any hour.
+
+### ■ The drill schedule
+
+**Menu → Duties → Drill schedule** orders up to eight drills a day, each at
+an hour the citizen chooses. At its hour a drill is called on the roll-call
+form, `DRILL 18:30`, and answered **PRESENT** or **ABSENT**. An absence is
+written down but does not break the attendance streak. Only the latest drill
+is called: one passed over while the phone lay untouched stays missed. A
+drill whose hour has already passed when it is ordered waits until tomorrow.
+Tap a drill in the schedule to strike it. The Regulations show the hours
+(`OFF` when none are ordered). The hours and the day's answers are kept in
+the preferences file `drills`.
+
+### ■ The passport
+
+Each time the phone enters a Wi-Fi network after a quarter of an hour or
+more away from every network, the papers earn an **entry visa**. The
+passport page in the papers shows the latest nine as stamps, each with its
+date and number, set at a slight angle. The launcher asks Android only
+whether Wi-Fi is up. It never asks the network's name, so no location
+permission is needed, and the record says only `ENTRY VISA STAMPED. THE
+NETWORK IS NOT NAMED.` The count and the dates of the last 24 visas are kept
+in the preferences file `passport`.
+
+### ■ The citizen exchange
+
+**Menu → Citizen exchange** shows the citizen's number as a QR code holding
+a `laibach://comrade/…` link. A comrade points their phone's own camera app
+at it, and the link opens the exchange on their phone, which checks the Damm
+digit and asks before registering. **Type in a comrade's number** does the
+same by hand. Forged numbers, the citizen's own number and comrades already
+registered are refused. The register lists each comrade's number and the day
+they were registered. Tap one to strike them. Only the numbers pass between
+the phones: nothing goes over a network, and the launcher asks for no camera
+permission. The register is kept in the preferences file `comrades`.
 
 ### ■ Joy coupons
 
@@ -789,7 +827,7 @@ storage, into a `Laibach` folder, and nowhere else.
 | **Save the card as a picture** | The citizen card, overprinted SPECIMEN so that it is never mistaken for a document | PNG in `Pictures/Laibach` |
 | **Share the card (specimen)** | The same picture, lent to the app the citizen chooses through the share menu | JPEG in the launcher's cache, swept away after a day |
 | **Print the case file** | Citizen number, standing, the weekly report and the permanent record | PDF in `Download/Laibach` |
-| **Back up the settings** | All of the launcher's preferences (uniform, plan, language, hidden, rationed and essential programmes, ministries, curfew, reveille, sounds, the record, the stamp album, the exit visas) | JSON in `Download/Laibach` |
+| **Back up the settings** | All of the launcher's preferences (uniform, plan, language, hidden, rationed and essential programmes, ministries, curfew, reveille, sounds, the record, the stamp album, the exit visas, the drills, the passport and the comrades) | JSON in `Download/Laibach` |
 | **Restore the settings** | Reads the newest backup there and redraws the terminal | — |
 
 The dressed lock-screen picture belongs to the phone and is excluded from
@@ -951,6 +989,26 @@ place:
 - Opened from the share menu only (no icon). Settings → The censor's desk
   `OFF` takes it out of the share menu.
 
+### ■ The poster press
+
+**Menu → Art & camera → Poster press** prints a slogan of up to 60 letters
+as a propaganda poster in one of three manners, in the uniform's paper, ink
+and accent:
+
+- **Constructivist**: a circle, a diagonal and a star, with the slogan set
+  flush left below.
+- **Woodcut**: a sun over the horizon in cut rays, framed like a block
+  print. The gouge marks fall differently for each slogan.
+- **Cold war**: the emblem in the sights of a radar, `NOTICE TO ALL
+  CITIZENS`, with the slogan on a band of ink below.
+
+The uniform suggests a manner; any of the three may be chosen.
+
+The proof follows the slogan as it is typed. **Save** puts the poster
+(1080 × 1350) in `Pictures/Laibach`. **Share** hands it to any app through
+the share menu, from the launcher's cache. The record notes that a poster
+was printed and in which manner, never its slogan.
+
 <a id="language-of-instruction"></a>
 
 ## 🗣️ XII. LANGUAGE OF INSTRUCTION
@@ -1013,6 +1071,13 @@ look further.
 >   sets only the lock-screen picture, and only when told to.
 > - **Unlocking.** The launcher never examines the finger and never sees or
 >   stores the PIN.
+> - **Wi-Fi.** The passport asks Android only whether Wi-Fi is up. It never
+>   asks which network, needs no location permission and keeps only the
+>   dates.
+> - **Comrades.** The exchange passes citizen numbers by QR code or by hand.
+>   The phone's own camera app reads the code; the launcher asks for no
+>   camera permission and sends nothing.
+> - **Posters.** The slogan is never written to the record.
 > - **Exports** are written only to the `Laibach` folders in `Pictures` and
 >   `Download`.
 > - **The network** (the `INTERNET` permission) is used only for the approved art (plain page and image
@@ -1040,6 +1105,7 @@ The state was built in stages. Each stage was fulfilled ahead of schedule.
 | **2.5** | The Plan | The daily norm, ministry quotas and inventory, the waiting room, the informant in the weekly report, and the number check at the counter. The terminal is rebuilt from separate organs. |
 | **2.6** | The Record | The exit visa for every redaction and banishment, ceremonies for promotions and attendance, Foundation Day with its extra joy coupon, the stamp album, and the identity card shared as a specimen. |
 | **2.7** | The Weather | Controlled weather from the sun's true position, worked out from the clock alone; a five-minute curfew warning; the dead drop; the anthem of the hour; and the typewriter at the censor's desk. |
+| **2.8** | The Exchange | The drill schedule, the passport and its entry visas, the citizen exchange by QR code, and the poster press. |
 
 <details>
 <summary><b>🔍 Findings of the inspectorate</b></summary>
