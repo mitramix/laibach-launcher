@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/VERSION-2.4.1%20THE%20DARKROOM-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.4.1, The Darkroom">
+  <img src="https://img.shields.io/badge/VERSION-2.4.2%20THE%20DARKROOM-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.4.2, The Darkroom">
   <img src="https://img.shields.io/badge/ANDROID-12%2B-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Android 12 or later">
   <img src="https://img.shields.io/badge/SIZE-~170%20KB-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="About 170 KB">
   <img src="https://img.shields.io/badge/LIBRARIES-NONE-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="No libraries">
@@ -68,7 +68,7 @@ default.
 | | |
 |---|---|
 | **Package** | `dev.laibach.launcher` |
-| **Version** | 2.4.1, *The Darkroom* |
+| **Version** | 2.4.2, *The Darkroom* |
 | **Source** | 31 Java files, no libraries, no Gradle |
 | **Size** | about 205 KB |
 | **Requires** | Android 12 (API 31) or later |
@@ -221,8 +221,8 @@ could document them.
     The plan day is the day of the year.
   - A proclamation in serif capitals. One is issued per day. Tapping it
     issues the next.
-  - The citizen's papers: `CITIZEN № 2284-86-112` on the left, `STANDING
-    B · OBEDIENT` on the right.
+  - The citizen's papers: `CITIZEN № 0438-2177-6512-0941-3378-7`, with
+    `STANDING B · OBEDIENT` on the line below.
   - SERVICE (uptime), RATION LEFT (attention left today, or OVERDRAWN) and
     LIFE FORCE (battery, ▲ while charging, red at 15% or below).
   - The ration bar, with a tick at each quarter, and `N% OF 2H 0M ATTENTION
@@ -394,9 +394,14 @@ in English and German.
 
 ### ■ Papers and the attention ration
 
-- **Citizen number.** Derived from the phone's app-scoped Android ID. It
-  survives reinstallation. It changes only after a factory reset or under a
-  different signing key.
+- **Citizen number.** The phone's app-scoped Android ID in full: 64 bits
+  written as 20 digits, then a check digit, `0438-2177-6512-0941-3378-7`. Two
+  phones share a number only if Android gave them the same ID. The check
+  digit follows Damm's algorithm, so a mistyped digit or two swapped
+  neighbours never pass for a real number. A phone with no Android ID is
+  issued a random 64-bit number once and keeps it. The number survives
+  reinstallation. It changes only after a factory reset or under a different
+  signing key.
 - **The ration.** Two hours of attention a day, counted from midnight. Time
   spent in other programmes is charged. Time spent on this terminal is time
   with the Collective and is free of charge.
@@ -908,6 +913,7 @@ The state was built in stages. Each stage was fulfilled ahead of schedule.
 | **2.3.1** | — | The terminal no longer names the make of the phone. It serves every Android citizen alike. |
 | **2.4** | The Darkroom | Laibach Camera and its darkroom, the state's sounds issued to the phone as ringtones, ten formations, and the **Regulations**: the launcher's own settings, with sounds on or off. The gear menu is regrouped into Art & camera and Duties. |
 | **2.4.1** | — | The censor's desk: text shared to the launcher comes back blacked out, as a decree or as a typed memo. |
+| **2.4.2** | — | Every citizen is renumbered: the full 64-bit Android ID as 20 digits and a Damm check digit. No two phones share a number. |
 
 <details>
 <summary><b>🔍 Findings of the inspectorate</b></summary>

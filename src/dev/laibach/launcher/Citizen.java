@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Process;
 import android.provider.Settings;
 
+import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Locale;
@@ -47,12 +48,50 @@ final class Citizen {
         return c.getTimeInMillis();
     }
 
-    /** A stable number for this phone, made from the app-scoped Android ID: 0438-21-776. */
+    /** Damm's table: one check digit catches every wrong digit and every swapped neighbour. */
+    private static final int[][] DAMM = {
+            {0, 3, 1, 7, 5, 9, 8, 6, 4, 2}, {7, 0, 9, 2, 1, 5, 4, 8, 6, 3}, {4, 2, 0, 6, 8, 7, 1, 3, 5, 9},
+            {1, 7, 5, 0, 9, 8, 3, 4, 2, 6}, {6, 1, 2, 3, 0, 4, 5, 9, 7, 8}, {3, 6, 7, 4, 2, 0, 9, 5, 8, 1},
+            {5, 8, 6, 9, 7, 2, 0, 1, 3, 4}, {8, 9, 4, 5, 3, 6, 2, 0, 1, 7}, {9, 4, 3, 8, 6, 1, 7, 2, 0, 5},
+            {2, 5, 8, 1, 4, 3, 6, 7, 9, 0}};
+
+    private static String number;
+
+    /**
+     * The citizen's number: the phone's app-scoped Android ID in full, 64 bits
+     * as 20 digits, and a Damm check digit: 0438-2177-6512-0941-3378-7. Two
+     * phones share it only if Android gave them the same ID. The ID survives a
+     * reinstall, so the number does too.
+     */
     static String number(Context c) {
+        if (number != null) return number;
+        String digits = String.format(Locale.ROOT, "%20s", Long.toUnsignedString(idBits(c))).replace(' ', '0');
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < 20; i += 4) out.append(digits, i, i + 4).append('-');
+        return number = out.append(damm(digits)).toString();
+    }
+
+    /** The Android ID as 64 bits; a phone without one is issued a random number, kept from then on. */
+    private static long idBits(Context c) {
         String id = Settings.Secure.getString(c.getContentResolver(), Settings.Secure.ANDROID_ID);
-        long n = Math.abs((long) (id == null ? 0 : id.hashCode())) % 1_000_000_000L;
-        String digits = String.format(Locale.ROOT, "%09d", n);
-        return digits.substring(0, 4) + "-" + digits.substring(4, 6) + "-" + digits.substring(6);
+        // 9774d56d682e549c: the ID a whole run of early phones shared.
+        if (id != null && !id.isEmpty() && !id.equalsIgnoreCase("9774d56d682e549c")) {
+            try {
+                return Long.parseUnsignedLong(id, 16);
+            } catch (NumberFormatException ignored) {
+                // Not the hex Android promises; issue a number instead.
+            }
+        }
+        SharedPreferences p = prefs(c);
+        if (!p.contains("number")) p.edit().putLong("number", new SecureRandom().nextLong()).commit();
+        return p.getLong("number", 0);
+    }
+
+    /** The Damm check digit of a string of digits. */
+    private static int damm(String digits) {
+        int interim = 0;
+        for (int i = 0; i < digits.length(); i++) interim = DAMM[interim][digits.charAt(i) - '0'];
+        return interim;
     }
 
     @SuppressWarnings("deprecation")

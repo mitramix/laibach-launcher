@@ -257,10 +257,13 @@ public class PapersActivity extends Activity {
         middle.addView(new EmblemView(this, v), new LinearLayout.LayoutParams(dp(72), dp(72)));
         LinearLayout who = column();
         who.setPadding(dp(16), 0, 0, 0);
+        // The number is 26 characters long: it takes the largest size that fits on one line.
         TextView number = type(26, v.ink, 25, 1000);
         number.setText("№ " + Citizen.number(this));
         number.setLetterSpacing(0.06f);
-        who.addView(number);
+        number.setMaxLines(1);
+        number.setAutoSizeTextTypeUniformWithConfiguration(10, 26, 1, TypedValue.COMPLEX_UNIT_SP);
+        who.addView(number, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(30)));
         int grade = Citizen.grade(this);
         TextView standing = type(12, grade >= 3 ? v.accent : v.ink, 70, 850);
         standing.setText(t("STANDING ", "ANSEHEN ") + Lang.pick(german, Citizen.STANDING[grade]));

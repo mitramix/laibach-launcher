@@ -585,12 +585,14 @@ public class HomeActivity extends Activity {
         mon.addView(slogan);
 
         // The citizen's papers: number and standing, then the day's ration of attention.
+        // The number is long, so the standing goes on the line under it.
         LinearLayout papers = row();
-        papers.setGravity(Gravity.CENTER_VERTICAL);
+        papers.setOrientation(LinearLayout.VERTICAL);
         citizenNumber = type(11, v.ink, 70, 800);
         citizenNumber.setLetterSpacing(0.14f);
+        citizenNumber.setSingleLine(true);
         citizenNumber.setText(t("CITIZEN № ", "BÜRGER NR. ") + Citizen.number(this));
-        papers.addView(citizenNumber, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        papers.addView(citizenNumber);
         standing = type(11, v.ink, 70, 800);
         standing.setLetterSpacing(0.14f);
         papers.addView(standing);
@@ -908,7 +910,7 @@ public class HomeActivity extends Activity {
         head.setPadding(0, dp(28), 0, dp(12));
         middle.addView(head);
         TextView who = type(14, v.accent, 40, 900);
-        who.setText(t("CITIZEN № ", "BÜRGER NR. ") + Citizen.number(this));
+        who.setText(t("CITIZEN № ", "BÜRGER NR. ").trim() + "\n" + Citizen.number(this));
         who.setLetterSpacing(0.16f);
         who.setGravity(Gravity.CENTER);
         middle.addView(who);
@@ -2014,7 +2016,7 @@ public class HomeActivity extends Activity {
 
         TextView foot = type(11, v.muted, 80, 600);
         foot.setLetterSpacing(0.18f);
-        foot.setText("LAIBACH LIFE™ " + version() + " · № " + Citizen.number(this));
+        foot.setText("LAIBACH LIFE™ " + version() + "\n№ " + Citizen.number(this));
         foot.setPadding(0, dp(22), 0, 0);
         page.addView(foot);
 

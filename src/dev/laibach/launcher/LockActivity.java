@@ -337,7 +337,7 @@ public class LockActivity extends Activity {
         head.addView(new Cyber.Eye(this, v), new LinearLayout.LayoutParams(dp(40), dp(24)));
         body.addView(head);
         TextView os = mono(10, v.muted);
-        os.setText("LAIBACH OS 2.0 · " + t("CITIZEN", "BÜRGER") + " № " + Citizen.number(this));
+        os.setText("LAIBACH OS 2.0\n" + t("CITIZEN", "BÜRGER") + " № " + Citizen.number(this));
         os.setPadding(0, dp(4), 0, 0);
         body.addView(os);
         body.addView(rule(v.accent), ruleParams(dp(3), dp(10), dp(4)));
