@@ -15,7 +15,7 @@ final class Variant {
     static final String PREFS = "laibach";
     static final String KEY = "variant";
 
-    /** Scenes behind the home screen; see {@link Cyber.Backdrop}. */
+    /** Scenes behind the home screen; see {@link Backdrop}. */
     static final int CATHEDRAL = 0, MARKET = 1, ANTHEM = 2, LUNAR = 3, NETWORK = 4,
             TEMPLE = 5, TECHNO = 6, DAWN = 7, ALPINE = 8;
 

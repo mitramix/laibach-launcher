@@ -48,7 +48,7 @@ import java.util.Locale;
  *
  * Switched off and on in the long-press menu (Public order → the terminal).
  */
-public class LockActivity extends Activity {
+public class LockActivity extends StateActivity {
     private static final String KEY_SEAL = "seal";
     private static final long HOLD = 1_400;
     /** Touches that began this soon after the screen came to the citizen are not theirs yet. */
@@ -75,12 +75,8 @@ public class LockActivity extends Activity {
     static Runnable onUnseal;
     private static int slogan = (int) (System.currentTimeMillis() / 60_000) % SLOGANS.length;
 
-    private Variant v;
-    private boolean german;
-    private Locale locale;
-    private Typeface flex;
     private TextView clock, date, power, standing, submissions, curfew, proclamation, caption;
-    private Cyber.Ticker ticker;
+    private Ticker ticker;
     private Seal seal;
     /** Whether the seal lies over the fingerprint sensor. */
     private boolean fingerprint;
@@ -154,20 +150,16 @@ public class LockActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setShowWhenLocked(true);
-        v = Variant.current(this);
-        german = Lang.german(this);
-        locale = Lang.locale(german);
-        flex = Typeface.create("roboto-flex", Typeface.NORMAL);
 
         getWindow().setBackgroundDrawable(new ColorDrawable(v.bg));
         FrameLayout frame = new FrameLayout(this);
-        frame.addView(new Cyber.Backdrop(this, v));
+        frame.addView(new Backdrop(this, v));
         frame.addView(buildUi());
         if (fingerprint) {
             // Over the whole screen, so that it can be touched wherever the sensor puts it.
             frame.addView(seal, new FrameLayout.LayoutParams(seal.size, seal.size, Gravity.TOP | Gravity.START));
         }
-        frame.addView(new Cyber.Crt(this, v));
+        frame.addView(new Crt(this, v));
         setContentView(frame);
         WindowInsetsController bars = getWindow().getInsetsController();
         bars.hide(WindowInsets.Type.systemBars());
@@ -334,7 +326,7 @@ public class LockActivity extends Activity {
         sealedText.setText(t("■ TERMINAL SEALED", "■ TERMINAL VERSIEGELT"));
         sealedText.setLetterSpacing(0.18f);
         head.addView(sealedText, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        head.addView(new Cyber.Eye(this, v), new LinearLayout.LayoutParams(dp(40), dp(24)));
+        head.addView(new Eye(this, v), new LinearLayout.LayoutParams(dp(40), dp(24)));
         body.addView(head);
         TextView os = mono(10, v.muted);
         os.setText("LAIBACH OS 2.0\n" + t("CITIZEN", "BÜRGER") + " № " + Citizen.number(this));
@@ -342,7 +334,7 @@ public class LockActivity extends Activity {
         body.addView(os);
         body.addView(rule(v.accent), ruleParams(dp(3), dp(10), dp(4)));
 
-        clock = new Cyber.GlitchText(this, v);
+        clock = new GlitchText(this, v);
         style(clock, 112, v.ink, 25, 900);
         clock.setIncludeFontPadding(false);
         clock.setLetterSpacing(-0.02f);
@@ -377,7 +369,7 @@ public class LockActivity extends Activity {
         root.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         // The seal, its caption and the one way out that needs no submission.
-        ticker = new Cyber.Ticker(this, v);
+        ticker = new Ticker(this, v);
         root.addView(ticker, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(20)));
         caption = type(13, v.accent, 40, 950);
         caption.setLetterSpacing(0.16f);
@@ -482,38 +474,8 @@ public class LockActivity extends Activity {
 
     // ---- Helpers ------------------------------------------------------------
 
-    private String t(String en, String de) {
-        return german ? de : Lang.en(en);
-    }
-
     private String time(String pattern) {
         return new SimpleDateFormat(pattern, locale).format(new Date());
-    }
-
-    private LinearLayout column() {
-        LinearLayout l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.VERTICAL);
-        return l;
-    }
-
-    private LinearLayout row() {
-        LinearLayout l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.HORIZONTAL);
-        return l;
-    }
-
-    private TextView type(float sp, int color, int width, int weight) {
-        return style(new TextView(this), sp, color, width, weight);
-    }
-
-    private TextView style(TextView t, float sp, int color, int width, int weight) {
-        t.setTypeface(flex);
-        if (!t.setFontVariationSettings("'wdth' " + width + ", 'wght' " + weight)) {
-            t.setTypeface(Typeface.create("sans-serif-condensed", weight >= 600 ? Typeface.BOLD : Typeface.NORMAL));
-        }
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        t.setTextColor(color);
-        return t;
     }
 
     private TextView mono(float sp, int color) {
@@ -524,28 +486,6 @@ public class LockActivity extends Activity {
         t.setLetterSpacing(0.06f);
         t.setMaxLines(1);
         return t;
-    }
-
-    private LinearLayout.LayoutParams fullWidth() {
-        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    }
-
-    private View rule(int color) {
-        View r = new View(this);
-        r.setBackgroundColor(color);
-        return r;
-    }
-
-    private LinearLayout.LayoutParams ruleParams(int height, int above, int below) {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-        lp.topMargin = above;
-        lp.bottomMargin = below;
-        return lp;
-    }
-
-    private int dp(float value) {
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value,
-                getResources().getDisplayMetrics()));
     }
 
     /** The dotted leader between a label and its value. */

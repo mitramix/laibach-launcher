@@ -36,7 +36,7 @@ import java.util.Locale;
  * day, self-criticism, and the permanent record. Opened from the papers line on
  * the home screen; with EXTRA_CONSTITUTION it opens on the full constitution.
  */
-public class PapersActivity extends Activity {
+public class PapersActivity extends StateActivity {
     static final String EXTRA_CONSTITUTION = "constitution";
 
     /** Faults a citizen may confess to, English and German in step. */
@@ -51,33 +51,18 @@ public class PapersActivity extends Activity {
             {"I have nothing to confess. (This is noted.)", "Ich habe nichts zu gestehen. (Das wird vermerkt.)"},
     };
 
-    private Variant v;
-    private boolean german;
-    private Locale locale;
-    private Typeface flex;
     private LinearLayout content;
     private View card;
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        v = Variant.current(this);
-        german = Lang.german(this);
-        locale = Lang.locale(german);
-        flex = Typeface.create("roboto-flex", Typeface.NORMAL);
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(v.bg));
         // The papers are read through the same glass as the home screen.
         FrameLayout glass = new FrameLayout(this);
         glass.addView(buildUi());
-        glass.addView(new Cyber.Crt(this, v));
-        setContentView(glass);
-        WindowInsetsController bars = getWindow().getInsetsController();
-        bars.hide(WindowInsets.Type.statusBars());
-        bars.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        int lightBars = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-        bars.setSystemBarsAppearance(v.light ? lightBars : 0, lightBars);
+        glass.addView(new Crt(this, v));
+        wear(glass);
         if (state == null && getIntent().getBooleanExtra(EXTRA_CONSTITUTION, false)) showConstitution();
     }
 
@@ -445,39 +430,6 @@ public class PapersActivity extends Activity {
 
     // ---- Helpers ------------------------------------------------------------
 
-    private String t(String en, String de) {
-        return german ? de : Lang.en(en);
-    }
-
-    private String span(long ms) {
-        long minutes = ms / 60_000;
-        if (minutes < 60) return minutes + "M";
-        return minutes / 60 + "H " + minutes % 60 + "M";
-    }
-
-    private LinearLayout column() {
-        LinearLayout l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.VERTICAL);
-        return l;
-    }
-
-    private LinearLayout row() {
-        LinearLayout l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.HORIZONTAL);
-        return l;
-    }
-
-    private TextView type(float sp, int color, int width, int weight) {
-        TextView t = new TextView(this);
-        t.setTypeface(flex);
-        if (!t.setFontVariationSettings("'wdth' " + width + ", 'wght' " + weight)) {
-            t.setTypeface(Typeface.create("sans-serif-condensed", weight >= 600 ? Typeface.BOLD : Typeface.NORMAL));
-        }
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        t.setTextColor(color);
-        return t;
-    }
-
     private TextView serif(float sp, int color) {
         TextView t = new TextView(this);
         t.setTypeface(Typeface.create("serif", Typeface.BOLD));
@@ -505,28 +457,6 @@ public class PapersActivity extends Activity {
         LinearLayout.LayoutParams lp = fullWidth();
         lp.topMargin = dp(10);
         return lp;
-    }
-
-    private LinearLayout.LayoutParams fullWidth() {
-        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    }
-
-    private View rule(int color) {
-        View r = new View(this);
-        r.setBackgroundColor(color);
-        return r;
-    }
-
-    private LinearLayout.LayoutParams ruleParams(int height, int above, int below) {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-        lp.topMargin = above;
-        lp.bottomMargin = below;
-        return lp;
-    }
-
-    private int dp(float value) {
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value,
-                getResources().getDisplayMetrics()));
     }
 
     /** Bars drawn from the citizen number, in the manner of a shop barcode. */

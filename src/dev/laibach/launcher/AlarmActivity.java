@@ -28,11 +28,8 @@ import java.util.Date;
  * answers. PRESENT stops it and answers the morning roll call; snoozing
  * buys five minutes and is noted in the record.
  */
-public class AlarmActivity extends Activity {
+public class AlarmActivity extends StateActivity {
     private final Handler main = new Handler(Looper.getMainLooper());
-    private Variant v;
-    private boolean german;
-    private Typeface flex;
     private Tones.Ringer ringer;
     private boolean answered;
 
@@ -47,15 +44,12 @@ public class AlarmActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        v = Variant.current(this);
-        german = Lang.german(this);
-        flex = Typeface.create("roboto-flex", Typeface.NORMAL);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().setBackgroundDrawable(new ColorDrawable(v.bg));
         FrameLayout frame = new FrameLayout(this);
-        frame.addView(new Cyber.Backdrop(this, v));
+        frame.addView(new Backdrop(this, v));
         frame.addView(buildUi());
-        frame.addView(new Cyber.Crt(this, v));
+        frame.addView(new Crt(this, v));
         setContentView(frame);
         getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
         // Back does not answer a roll call.
@@ -157,22 +151,4 @@ public class AlarmActivity extends Activity {
         return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
-    private TextView type(float sp, int color, int width, int weight) {
-        TextView t = new TextView(this);
-        t.setTypeface(flex);
-        if (!t.setFontVariationSettings("'wdth' " + width + ", 'wght' " + weight)) {
-            t.setTypeface(Typeface.create("sans-serif-condensed", weight >= 600 ? Typeface.BOLD : Typeface.NORMAL));
-        }
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        t.setTextColor(color);
-        return t;
-    }
-
-    private String t(String en, String de) {
-        return german ? de : Lang.en(en);
-    }
-
-    private int dp(float value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
-    }
 }

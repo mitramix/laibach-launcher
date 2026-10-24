@@ -68,7 +68,7 @@ import java.util.Map;
  * copied, scaled down, into the app's private folder, so the originals are
  * never touched.
  */
-public class VolkskunstActivity extends Activity {
+public class VolkskunstActivity extends StateActivity {
     private static final int PICK = 1;
     private static final int MAX_SIDE = 2048;
     private static final String KEY_WORKS = "works";
@@ -90,10 +90,6 @@ public class VolkskunstActivity extends Activity {
         }
     }
 
-    private Variant v;
-    private boolean german;
-    private Locale locale;
-    private Typeface flex;
     private SharedPreferences prefs;
     private File dir;
     private final List<Work> works = new ArrayList<>();
@@ -109,23 +105,12 @@ public class VolkskunstActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        v = Variant.current(this);
-        german = Lang.german(this);
-        locale = Lang.locale(german);
-        flex = Typeface.create("roboto-flex", Typeface.NORMAL);
         prefs = getSharedPreferences("volkskunst", MODE_PRIVATE);
         dir = new File(getFilesDir(), "volkskunst");
         dir.mkdirs();
         load();
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(v.bg));
-        setContentView(buildUi());
-        WindowInsetsController bars = getWindow().getInsetsController();
-        bars.hide(WindowInsets.Type.statusBars());
-        bars.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        int lightBars = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-        bars.setSystemBarsAppearance(v.light ? lightBars : 0, lightBars);
+        wear(buildUi());
         show();
     }
 
@@ -223,17 +208,6 @@ public class VolkskunstActivity extends Activity {
 
     private LinearLayout.LayoutParams weight() {
         return new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-    }
-
-    private TextView type(float sp, int color, int width, int weight) {
-        TextView t = new TextView(this);
-        t.setTypeface(flex);
-        if (!t.setFontVariationSettings("'wdth' " + width + ", 'wght' " + weight)) {
-            t.setTypeface(Typeface.create("sans-serif-condensed", weight >= 600 ? Typeface.BOLD : Typeface.NORMAL));
-        }
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        t.setTextColor(color);
-        return t;
     }
 
     private TextView button(String text, int color, View.OnClickListener click) {
@@ -439,11 +413,6 @@ public class VolkskunstActivity extends Activity {
                 .show(), v);
     }
 
-    /** The English or the German text, by the chosen language. */
-    private String t(String en, String de) {
-        return german ? de : Lang.en(en);
-    }
-
     /** A stored title or author; the stored placeholder shows in the chosen language. */
     private String shown(String value, String placeholder, String english) {
         return value.isEmpty() || placeholder.equals(value) ? t(english, placeholder) : value;
@@ -474,11 +443,6 @@ public class VolkskunstActivity extends Activity {
                 })
                 .setNegativeButton(t("Cancel", "Abbrechen"), null)
                 .show(), v);
-    }
-
-    private int dp(float value) {
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value,
-                getResources().getDisplayMetrics()));
     }
 
     // ---- The wall -----------------------------------------------------------

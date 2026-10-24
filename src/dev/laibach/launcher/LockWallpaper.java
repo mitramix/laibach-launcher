@@ -126,7 +126,7 @@ final class LockWallpaper {
         Bitmap picture = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(picture);
         canvas.drawColor(v.bg);
-        for (View layer : new View[]{new Cyber.Backdrop(c, v), new Cyber.Crt(c, v)}) {
+        for (View layer : new View[]{new Backdrop(c, v), new Crt(c, v)}) {
             layer.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY));
             layer.layout(0, 0, w, h);

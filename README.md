@@ -114,6 +114,23 @@ creates a signing key in `keystore/` (`laibach.jks` and `password.txt`).
 > **Guard the `keystore/` folder.** Every update must carry the same key. It
 > is never committed.
 
+### ■ Organs of the state (source layout)
+
+Each part of the terminal is a file of its own in `src/dev/laibach/launcher/`.
+`HomeActivity` only assembles the screen and answers the system; every part
+of the home screen extends `HomePart` and draws with the shared tools in
+`StateActivity`, which every other screen also extends.
+
+| Organ | Files |
+|---|---|
+| **Screens** | `StateActivity` (shared uniform and type), `HomeActivity`, `PapersActivity`, `LockActivity`, `CensorActivity`, `DarkroomActivity`, `VolkskunstActivity`, `BroadcastActivity`, `AlarmActivity` |
+| **Home screen parts** | `HomePart` (base), `Ledger` (number, standing, ration, life force), `Decrees`, `OnAir`, `ArtCredit`, `News` (the ticker's text), `Curfew`, `RollCall`, `Regulations` |
+| **Programmes** | `App`, `ProgrammeAdapter` (rows, grids, ministry headers), `Counter` (opening a programme past the ration and the coupons), `ProgrammeMenu`, `Ministry`, `Formation` |
+| **Menus and orders** | `GearMenu`, `Orders`, `CallUps`, `PowerRation`, `StateMenu` |
+| **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Backdrop`, `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
+| **The citizen** | `Citizen`, `Record`, `Report`, `Constitution`, `Exports` |
+| **Language** | `Lang`, `Slovene` (every English string has its Slovenian) |
+
 ### ■ Installation over adb
 
 ```bash
@@ -540,8 +557,8 @@ reset at midnight.
 ## 📡 VIII. SYNTHETIC STATE
 
 Version 2.0. The terminal is set in motion. It boots, it glitches, it watches
-and it broadcasts. Everything below is drawn in code (`Cyber.java`,
-`Fx.java`). No images or fonts were added.
+and it broadcasts. Everything below is drawn in code (`Cyber.java` and
+the effect files beside it, `Fx.java`). No images or fonts were added.
 
 | Effect | Description |
 |---|---|

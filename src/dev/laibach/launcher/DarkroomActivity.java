@@ -62,19 +62,15 @@ import java.util.Locale;
  * pixels alone, so no location or other metadata leaves with them. The
  * photograph itself is kept only while it is on the table.
  */
-public class DarkroomActivity extends Activity {
+public class DarkroomActivity extends StateActivity {
     private static final int CAPTURE = 1, PICK = 2;
     private static final int MAX_SIDE = 2048;
     private static final String CAPTURE_FILE = "capture.jpg";
     private static final String KEY_ISSUED = "darkroomIssued";
 
     /** The uniform the room is dressed in. */
-    private Variant ui;
     /** The uniform the print is developed in. */
     private Variant treatment;
-    private boolean german;
-    private Locale locale;
-    private Typeface flex;
     private SharedPreferences prefs;
 
     private Bitmap source, developed;
@@ -89,21 +85,10 @@ public class DarkroomActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        ui = Variant.current(this);
-        treatment = ui;
-        german = Lang.german(this);
-        locale = Lang.locale(german);
-        flex = Typeface.create("roboto-flex", Typeface.NORMAL);
+        treatment = v;
         prefs = getSharedPreferences(Variant.PREFS, MODE_PRIVATE);
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(ui.bg));
-        setContentView(buildUi());
-        WindowInsetsController insets = getWindow().getInsetsController();
-        insets.hide(WindowInsets.Type.statusBars());
-        insets.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        int lightBars = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-        insets.setSystemBarsAppearance(ui.light ? lightBars : 0, lightBars);
+        wear(buildUi());
         DarkroomProvider.sweep(this);
         show();
         receive(getIntent());
@@ -120,7 +105,7 @@ public class DarkroomActivity extends Activity {
 
     private View buildUi() {
         FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(ui.bg);
+        root.setBackgroundColor(v.bg);
         LinearLayout chrome = new LinearLayout(this);
         chrome.setOrientation(LinearLayout.VERTICAL);
         root.addView(chrome);
@@ -128,22 +113,22 @@ public class DarkroomActivity extends Activity {
         // Head: back, title, the decree in hand, rule.
         LinearLayout head = new LinearLayout(this);
         head.setGravity(Gravity.CENTER_VERTICAL);
-        TextView back = type(26, ui.accent, 25, 1000);
+        TextView back = type(26, v.accent, 25, 1000);
         back.setText("◀");
         back.setPadding(0, 0, dp(12), 0);
         back.setOnClickListener(view -> finish());
         head.addView(back);
-        TextView title = type(30, ui.ink, 25, 1000);
+        TextView title = type(30, v.ink, 25, 1000);
         title.setText(t("DARKROOM", "DUNKELKAMMER"));
         title.setLetterSpacing(0.14f);
         title.setSingleLine();
         head.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        counter = type(15, ui.accent, 25, 1000);
+        counter = type(15, v.accent, 25, 1000);
         counter.setLetterSpacing(0.08f);
         head.addView(counter);
         chrome.addView(head);
         View rule = new View(this);
-        rule.setBackgroundColor(ui.accent);
+        rule.setBackgroundColor(v.accent);
         LinearLayout.LayoutParams ruleLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(5));
         ruleLp.topMargin = dp(6);
         chrome.addView(rule, ruleLp);
@@ -155,28 +140,28 @@ public class DarkroomActivity extends Activity {
         LinearLayout none = new LinearLayout(this);
         none.setOrientation(LinearLayout.VERTICAL);
         none.setGravity(Gravity.CENTER);
-        TextView noneTitle = type(34, ui.ink, 25, 1000);
+        TextView noneTitle = type(34, v.ink, 25, 1000);
         noneTitle.setText(t("THE DARKROOM", "DIE DUNKELKAMMER"));
         noneTitle.setGravity(Gravity.CENTER);
         none.addView(noneTitle);
         TextView noneText = new TextView(this);
         noneText.setTypeface(Typeface.create("serif", Typeface.BOLD));
         noneText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        noneText.setTextColor(ui.muted);
+        noneText.setTextColor(v.muted);
         noneText.setGravity(Gravity.CENTER);
         noneText.setLetterSpacing(0.04f);
         noneText.setText(t("EVERY PHOTOGRAPH IS DEVELOPED BY THE STATE.\nFACES ARE BLACKED OUT. COORDINATES ARE REMOVED.\nTHE ORIGINAL IS NOT KEPT.",
                 "JEDES FOTO WIRD VOM STAAT ENTWICKELT.\nGESICHTER WERDEN GESCHWÄRZT. KOORDINATEN WERDEN ENTFERNT.\nDAS ORIGINAL WIRD NICHT AUFBEWAHRT."));
         noneText.setPadding(0, dp(12), 0, dp(24));
         none.addView(noneText);
-        TextView take = button(t("■ TAKE A PHOTOGRAPH", "■ EIN FOTO AUFNEHMEN"), ui.accent, view -> capture());
+        TextView take = button(t("■ TAKE A PHOTOGRAPH", "■ EIN FOTO AUFNEHMEN"), v.accent, view -> capture());
         take.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         take.setGravity(Gravity.CENTER);
         none.addView(take, full());
-        TextView submit = button(t("SUBMIT A PICTURE", "EIN BILD EINREICHEN"), ui.ink, view -> pick());
+        TextView submit = button(t("SUBMIT A PICTURE", "EIN BILD EINREICHEN"), v.ink, view -> pick());
         submit.setGravity(Gravity.CENTER);
         none.addView(submit, full());
-        TextView specimen = button(t("SPECIMEN (TEST PICTURE)", "MUSTER (TESTBILD)"), ui.muted, view -> specimen());
+        TextView specimen = button(t("SPECIMEN (TEST PICTURE)", "MUSTER (TESTBILD)"), v.muted, view -> specimen());
         specimen.setGravity(Gravity.CENTER);
         none.addView(specimen, full());
         empty = none;
@@ -190,32 +175,32 @@ public class DarkroomActivity extends Activity {
         plateLp.topMargin = dp(12);
         plateLp.bottomMargin = dp(8);
         desk.addView(plate, plateLp);
-        hint = type(11, ui.muted, 50, 700);
+        hint = type(11, v.muted, 50, 700);
         hint.setLetterSpacing(0.06f);
         hint.setGravity(Gravity.CENTER);
         desk.addView(hint, full());
         LinearLayout tools = new LinearLayout(this);
-        bars = button(t("■ BARS", "■ BALKEN"), ui.accent, view -> mode(false));
+        bars = button(t("■ BARS", "■ BALKEN"), v.accent, view -> mode(false));
         tools.addView(bars, weight());
-        paint = button(t("PAINT OUT", "WEGRETUSCHIEREN"), ui.muted, view -> mode(true));
+        paint = button(t("PAINT OUT", "WEGRETUSCHIEREN"), v.muted, view -> mode(true));
         paint.setGravity(Gravity.CENTER_HORIZONTAL);
         tools.addView(paint, weight());
-        TextView undo = button(t("UNDO", "ZURÜCK"), ui.ink, view -> undo());
+        TextView undo = button(t("UNDO", "ZURÜCK"), v.ink, view -> undo());
         undo.setGravity(Gravity.END);
         tools.addView(undo, weight());
         desk.addView(tools);
-        treatmentButton = button("", ui.ink, view -> nextTreatment());
+        treatmentButton = button("", v.ink, view -> nextTreatment());
         treatmentButton.setPadding(0, 0, 0, dp(12));
         desk.addView(treatmentButton, full());
         View footRule = new View(this);
-        footRule.setBackgroundColor(ui.accent);
+        footRule.setBackgroundColor(v.accent);
         desk.addView(footRule, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(2)));
         LinearLayout foot = new LinearLayout(this);
-        foot.addView(button(t("■ FILE", "■ ABLEGEN"), ui.accent, view -> file()), weight());
-        TextView share = button(t("SHARE", "TEILEN"), ui.ink, view -> share());
+        foot.addView(button(t("■ FILE", "■ ABLEGEN"), v.accent, view -> file()), weight());
+        TextView share = button(t("SHARE", "TEILEN"), v.ink, view -> share());
         share.setGravity(Gravity.CENTER_HORIZONTAL);
         foot.addView(share, weight());
-        TextView again = button(t("NEW", "NEU"), ui.muted, view -> clear());
+        TextView again = button(t("NEW", "NEU"), v.muted, view -> clear());
         again.setGravity(Gravity.END);
         foot.addView(again, weight());
         desk.addView(foot);
@@ -238,17 +223,6 @@ public class DarkroomActivity extends Activity {
         return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
-    private TextView type(float sp, int color, int width, int weight) {
-        TextView t = new TextView(this);
-        t.setTypeface(flex);
-        if (!t.setFontVariationSettings("'wdth' " + width + ", 'wght' " + weight)) {
-            t.setTypeface(Typeface.create("sans-serif-condensed", weight >= 600 ? Typeface.BOLD : Typeface.NORMAL));
-        }
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        t.setTextColor(color);
-        return t;
-    }
-
     private TextView button(String text, int color, View.OnClickListener click) {
         TextView b = type(13, color, 50, 850);
         b.setText(text);
@@ -268,9 +242,9 @@ public class DarkroomActivity extends Activity {
         } else {
             counter.setText(developed != null ? t("DECREE ", "ERLASS ") + number() : "");
         }
-        bars.setTextColor(painting ? ui.muted : ui.accent);
+        bars.setTextColor(painting ? v.muted : v.accent);
         bars.setText(painting ? t("BARS", "BALKEN") : t("■ BARS", "■ BALKEN"));
-        paint.setTextColor(painting ? ui.accent : ui.muted);
+        paint.setTextColor(painting ? v.accent : v.muted);
         paint.setText(painting ? t("■ PAINT OUT", "■ WEGRETUSCHIEREN") : t("PAINT OUT", "WEGRETUSCHIEREN"));
         hint.setText(painting
                 ? t("PAINT OUT WHOEVER IS NO LONGER WITH US.", "RETUSCHIEREN SIE WEG, WER NICHT MEHR BEI UNS IST.")
@@ -807,11 +781,4 @@ public class DarkroomActivity extends Activity {
         }
     }
 
-    private int dp(float v) {
-        return Math.round(v * getResources().getDisplayMetrics().density);
-    }
-
-    private String t(String en, String de) {
-        return german ? de : Lang.en(en);
-    }
 }

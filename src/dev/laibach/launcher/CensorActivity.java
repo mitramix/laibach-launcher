@@ -52,17 +52,13 @@ import java.util.Locale;
  * then issues the text again, as text with bars or as a memo on paper with
  * the seal and the stamp. The text is kept only while it is on the desk.
  */
-public class CensorActivity extends Activity {
+public class CensorActivity extends StateActivity {
     /** The longest text the desk takes. */
     private static final int MAX_TEXT = 20_000;
     /** The longest text drawn on a memo. */
     private static final int MAX_MEMO = 6_000;
     private static final String KEY_ISSUED = "censorIssued";
 
-    private Variant ui;
-    private boolean german;
-    private Locale locale;
-    private Typeface flex;
     private SharedPreferences prefs;
 
     private String text;
@@ -75,20 +71,9 @@ public class CensorActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        ui = Variant.current(this);
-        german = Lang.german(this);
-        locale = Lang.locale(german);
-        flex = Typeface.create("roboto-flex", Typeface.NORMAL);
         prefs = getSharedPreferences(Variant.PREFS, MODE_PRIVATE);
 
-        getWindow().setBackgroundDrawable(new ColorDrawable(ui.bg));
-        setContentView(buildUi());
-        WindowInsetsController insets = getWindow().getInsetsController();
-        insets.hide(WindowInsets.Type.statusBars());
-        insets.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        int lightBars = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-        insets.setSystemBarsAppearance(ui.light ? lightBars : 0, lightBars);
+        wear(buildUi());
         DarkroomProvider.sweep(this);
         receive(getIntent());
         show();
@@ -124,29 +109,29 @@ public class CensorActivity extends Activity {
 
     private View buildUi() {
         FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(ui.bg);
+        root.setBackgroundColor(v.bg);
         LinearLayout chrome = new LinearLayout(this);
         chrome.setOrientation(LinearLayout.VERTICAL);
         root.addView(chrome);
 
         LinearLayout head = new LinearLayout(this);
         head.setGravity(Gravity.CENTER_VERTICAL);
-        TextView back = type(26, ui.accent, 25, 1000);
+        TextView back = type(26, v.accent, 25, 1000);
         back.setText("◀");
         back.setPadding(0, 0, dp(12), 0);
         back.setOnClickListener(view -> finish());
         head.addView(back);
-        TextView title = type(30, ui.ink, 25, 1000);
+        TextView title = type(30, v.ink, 25, 1000);
         title.setText(t("THE CENSOR", "DIE ZENSUR"));
         title.setLetterSpacing(0.14f);
         title.setSingleLine();
         head.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        counter = type(15, ui.accent, 25, 1000);
+        counter = type(15, v.accent, 25, 1000);
         counter.setLetterSpacing(0.08f);
         head.addView(counter);
         chrome.addView(head);
         View rule = new View(this);
-        rule.setBackgroundColor(ui.accent);
+        rule.setBackgroundColor(v.accent);
         LinearLayout.LayoutParams ruleLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(5));
         ruleLp.topMargin = dp(6);
         chrome.addView(rule, ruleLp);
@@ -158,21 +143,21 @@ public class CensorActivity extends Activity {
         LinearLayout none = new LinearLayout(this);
         none.setOrientation(LinearLayout.VERTICAL);
         none.setGravity(Gravity.CENTER);
-        TextView noneTitle = type(34, ui.ink, 25, 1000);
+        TextView noneTitle = type(34, v.ink, 25, 1000);
         noneTitle.setText(t("THE CENSOR'S DESK", "DER TISCH DES ZENSORS"));
         noneTitle.setGravity(Gravity.CENTER);
         none.addView(noneTitle);
         TextView noneText = new TextView(this);
         noneText.setTypeface(Typeface.create("serif", Typeface.BOLD));
         noneText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        noneText.setTextColor(ui.muted);
+        noneText.setTextColor(v.muted);
         noneText.setGravity(Gravity.CENTER);
         noneText.setLetterSpacing(0.04f);
         noneText.setText(t("SHARE A TEXT FROM ANY APP AND CHOOSE \"SUBMIT TO THE CENSOR\".\nNAMES, NUMBERS AND ADDRESSES ARE BLACKED OUT.\nTHE TEXT IS NOT KEPT.",
                 "TEILEN SIE EINEN TEXT AUS EINER APP UND WÄHLEN SIE „DER ZENSUR VORLEGEN“.\nNAMEN, NUMMERN UND ADRESSEN WERDEN GESCHWÄRZT.\nDER TEXT WIRD NICHT AUFBEWAHRT."));
         noneText.setPadding(0, dp(12), 0, dp(24));
         none.addView(noneText);
-        TextView specimen = button(t("SPECIMEN (TEST TEXT)", "MUSTER (TESTTEXT)"), ui.accent, view -> {
+        TextView specimen = button(t("SPECIMEN (TEST TEXT)", "MUSTER (TESTTEXT)"), v.accent, view -> {
             lay(specimen());
             show();
         });
@@ -191,7 +176,7 @@ public class CensorActivity extends Activity {
         sheet.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         sheet.setLineSpacing(0, 1.25f);
         sheet.setTextColor(0xFF151515);
-        sheet.setBackgroundColor(Censor.paper(ui));
+        sheet.setBackgroundColor(Censor.paper(v));
         sheet.setPadding(dp(18), dp(18), dp(18), dp(18));
         sheet.setOnTouchListener(new Pen());
         scroll.addView(sheet, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -199,21 +184,21 @@ public class CensorActivity extends Activity {
         scrollLp.topMargin = dp(12);
         scrollLp.bottomMargin = dp(8);
         table.addView(scroll, scrollLp);
-        tally = type(11, ui.muted, 50, 700);
+        tally = type(11, v.muted, 50, 700);
         tally.setLetterSpacing(0.06f);
         tally.setGravity(Gravity.CENTER);
         table.addView(tally, full());
         View footRule = new View(this);
-        footRule.setBackgroundColor(ui.accent);
+        footRule.setBackgroundColor(v.accent);
         LinearLayout.LayoutParams footRuleLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(2));
         footRuleLp.topMargin = dp(8);
         table.addView(footRule, footRuleLp);
         LinearLayout foot = new LinearLayout(this);
-        foot.addView(button(t("■ ISSUE", "■ HERAUSGEBEN"), ui.accent, view -> issueText()), weight());
-        TextView memo = button(t("AS A MEMO", "ALS AKTENNOTIZ"), ui.ink, view -> issueMemo());
+        foot.addView(button(t("■ ISSUE", "■ HERAUSGEBEN"), v.accent, view -> issueText()), weight());
+        TextView memo = button(t("AS A MEMO", "ALS AKTENNOTIZ"), v.ink, view -> issueMemo());
         memo.setGravity(Gravity.CENTER_HORIZONTAL);
         foot.addView(memo, weight());
-        TextView copy = button(t("COPY", "KOPIEREN"), ui.muted, view -> copy());
+        TextView copy = button(t("COPY", "KOPIEREN"), v.muted, view -> copy());
         copy.setGravity(Gravity.END);
         foot.addView(copy, weight());
         table.addView(foot);
@@ -234,17 +219,6 @@ public class CensorActivity extends Activity {
 
     private LinearLayout.LayoutParams full() {
         return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    }
-
-    private TextView type(float sp, int color, int width, int weight) {
-        TextView t = new TextView(this);
-        t.setTypeface(flex);
-        if (!t.setFontVariationSettings("'wdth' " + width + ", 'wght' " + weight)) {
-            t.setTypeface(Typeface.create("sans-serif-condensed", weight >= 600 ? Typeface.BOLD : Typeface.NORMAL));
-        }
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        t.setTextColor(color);
-        return t;
     }
 
     private TextView button(String text, int color, View.OnClickListener click) {
@@ -433,24 +407,24 @@ public class CensorActivity extends Activity {
         Bitmap out = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(out);
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p.setColor(Censor.paper(ui));
+        p.setColor(Censor.paper(v));
         c.drawRect(0, 0, w, h, p);
 
         // The band: the seal, the decree and the foot line, as on a print from the darkroom.
-        p.setColor(ui.bg);
+        p.setColor(v.bg);
         c.drawRect(0, 0, w, band, p);
-        p.setColor(ui.accent);
+        p.setColor(v.accent);
         c.drawRect(0, band - 8, w, band, p);
         float r = band * 0.3f, cx = margin * 0.6f + r, cy = band / 2f;
-        Censor.seal(c, cx, cy, r, ui);
+        Censor.seal(c, cx, cy, r, v);
         Paint line = new Paint(Paint.ANTI_ALIAS_FLAG);
         line.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
         line.setLetterSpacing(0.08f);
         float left = cx + r * 1.6f, room = w - margin * 0.6f - left;
-        line.setColor(ui.accent);
+        line.setColor(v.accent);
         Censor.fit(line, decree, room, band * 0.2f);
         c.drawText(decree, left, cy - band * 0.04f, line);
-        line.setColor(ui.muted);
+        line.setColor(v.muted);
         line.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         Censor.fit(line, foot, room, band * 0.13f);
         c.drawText(foot, left, cy + band * 0.2f, line);
@@ -461,7 +435,7 @@ public class CensorActivity extends Activity {
         c.restore();
         c.save();
         c.translate(0, band);
-        Censor.rubberStamp(c, stamp, w, sheetH, ui);
+        Censor.rubberStamp(c, stamp, w, sheetH, v);
         c.restore();
         return out;
     }
@@ -477,11 +451,4 @@ public class CensorActivity extends Activity {
                 + "Questions to Anna Novak, telephone +386 41 000 000, or anna@example.org.\n\nThe truth will follow later.";
     }
 
-    private int dp(float v) {
-        return Math.round(v * getResources().getDisplayMetrics().density);
-    }
-
-    private String t(String en, String de) {
-        return german ? de : Lang.en(en);
-    }
 }
