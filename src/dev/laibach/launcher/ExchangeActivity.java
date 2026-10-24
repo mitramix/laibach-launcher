@@ -3,7 +3,6 @@ package dev.laibach.launcher;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Insets;
@@ -23,10 +22,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The citizen exchange: two phones register each other as comrades. Each
@@ -34,29 +31,14 @@ import java.util.Map;
  * the other phone's own camera app reads it and opens this screen, which asks
  * before registering. The number can also be typed in. Nothing goes over a
  * network and no camera permission is asked for: only the numbers pass, and
- * the register of them is kept in the preferences file {@code comrades}.
+ * the register of them is kept by Comrades.
  */
 public final class ExchangeActivity extends StateActivity {
-    private static final String PREFS = "comrades";
     static final String SCHEME = "laibach", HOST = "comrade";
 
     private LinearLayout content;
     /** The question now on screen, so a second link read replaces it rather than stacking on it. */
     private AlertDialog asking;
-
-    private static SharedPreferences prefs(Context c) {
-        return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-    }
-
-    /** The registered comrades as {digits, when registered}, the latest first. */
-    static List<String[]> comrades(Context c) {
-        List<String[]> out = new ArrayList<>();
-        for (Map.Entry<String, ?> e : prefs(c).getAll().entrySet()) {
-            if (e.getValue() instanceof Long) out.add(new String[]{e.getKey(), String.valueOf(e.getValue())});
-        }
-        out.sort((a, b) -> Long.compare(Long.parseLong(b[1]), Long.parseLong(a[1])));
-        return out;
-    }
 
     /** 21 digits set out as the state prints them: 0438-2177-6512-0941-3378-7. */
     static String formatted(String digits) {
@@ -109,7 +91,7 @@ public final class ExchangeActivity extends StateActivity {
                     "Das ist Ihre eigene Nummer. Ein Bürger kann nicht sein eigener Genosse sein."));
             return;
         }
-        if (prefs(this).contains(digits)) {
+        if (Comrades.registered(this, digits)) {
             toast(t("This comrade is already registered.", "Dieser Genosse ist bereits registriert."));
             return;
         }
@@ -124,7 +106,7 @@ public final class ExchangeActivity extends StateActivity {
     }
 
     private void register(String digits) {
-        prefs(this).edit().putLong(digits, System.currentTimeMillis()).apply();
+        Comrades.add(this, digits);
         Record.note(this, "COMRADESHIP REGISTERED WITH CITIZEN № " + formatted(digits) + ".",
                 "GENOSSENSCHAFT REGISTRIERT MIT BÜRGER NR. " + formatted(digits) + ".");
         Tones.play(this, Tones.stamp());
@@ -137,7 +119,7 @@ public final class ExchangeActivity extends StateActivity {
         StateMenu.dress(new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
                 .setTitle(t("Citizen № ", "Bürger Nr. ") + formatted(digits))
                 .setPositiveButton(t("Strike from the register", "Aus dem Register streichen"), (d, w) -> {
-                    prefs(this).edit().remove(digits).apply();
+                    Comrades.remove(this, digits);
                     Record.note(this, "A COMRADE WAS STRUCK FROM THE REGISTER.",
                             "EIN GENOSSE WURDE AUS DEM REGISTER GESTRICHEN.");
                     fill();
@@ -221,7 +203,7 @@ public final class ExchangeActivity extends StateActivity {
         lp.topMargin = dp(16);
         content.addView(button(t("TYPE IN A COMRADE'S NUMBER", "NUMMER EINES GENOSSEN EINGEBEN"), view -> typeIn()), lp);
 
-        List<String[]> comrades = comrades(this);
+        List<String[]> comrades = Comrades.all(this);
         heading(t("REGISTER OF COMRADES", "REGISTER DER GENOSSEN"));
         if (comrades.isEmpty()) {
             TextView none = type(11, v.muted, 80, 650);

@@ -58,7 +58,7 @@ final class GearMenu extends HomePart {
         duties.add(0, 10, 2, t("Curfew drill", "Sperrstundenübung"));
         duties.add(0, 36, 3, t("Drill schedule", "Übungsplan"));
         menu.add(0, 35, 0, t("Citizen exchange (register a comrade)", "Bürgeraustausch (einen Genossen registrieren)"));
-        menu.add(0, 1, 0, home.showHidden ? t("Hide redacted", "Geschwärzte verbergen") : t("Show redacted", "Geschwärzte zeigen"));
+        menu.add(0, 1, 0, home.register.showHidden ? t("Hide redacted", "Geschwärzte verbergen") : t("Show redacted", "Geschwärzte zeigen"));
         menu.add(0, 4, 0, t("Settings", "Einstellungen"));
         StateMenu.show(anchor, v, "LAIBACH LIFE™", menu, Gravity.START, item -> home.orders.act(item.getItemId()));
     }

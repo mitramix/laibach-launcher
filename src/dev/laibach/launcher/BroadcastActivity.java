@@ -1,6 +1,5 @@
 package dev.laibach.launcher;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -9,21 +8,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Insets;
-import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.LruCache;
-import android.util.TypedValue;
-import android.util.Xml;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -40,18 +34,10 @@ import android.widget.Toast;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
-import org.xmlpull.v1.XmlPullParser;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -68,7 +54,6 @@ import java.util.concurrent.Executors;
  * not allow embedding can be opened, alone, in the YouTube app.
  */
 public class BroadcastActivity extends StateActivity {
-    static final String CHANNEL = "UCE1VRNkKm2u6xI_No7SCKVQ";
     private static final String FEEDS = "https://www.youtube.com/feeds/videos.xml?";
     /** The page the player is served from, so that YouTube sees where it is embedded. */
     private static final String ORIGIN = "https://dev.laibach.launcher";
@@ -76,7 +61,7 @@ public class BroadcastActivity extends StateActivity {
 
     /** The programme guide: English, German, the feed. Only the channel's own videos are shown. */
     private static final String[][] PROGRAMMES = {
-            {"LATEST", "NEUESTE", "channel_id=" + CHANNEL},
+            {"LATEST", "NEUESTE", "channel_id=" + Feed.CHANNEL},
             {"OFFICIAL VIDEOS", "OFFIZIELLE VIDEOS", "playlist_id=PLAOH3RTMh-JMVmtD-EbBLa3eSIgir5hgG"},
             {"FEATURED", "AUSGEWÄHLT", "playlist_id=PL086F2B9E26CB6545"},
             {"ALAMUT", "ALAMUT", "playlist_id=PLAOH3RTMh-JMdqYAWjG_4rlAF-ITNv4Ak"},
@@ -91,17 +76,9 @@ public class BroadcastActivity extends StateActivity {
 
     /** Opens the broadcaster on this video, playing (from the home screen's ON AIR strip). */
     static final String EXTRA_VIDEO_ID = "video", EXTRA_TITLE = "title";
-    /** Where each video was left off, and the watch-later list. */
-    private static final String PREFS = "tv";
-
-    /** One video in a feed. */
-    static final class Video {
-        String id, title, published;
-        long views = -1;
-    }
 
     /** Feeds already received in this process, with when they were received. */
-    private static final Map<String, List<Video>> guide = new HashMap<>();
+    private static final Map<String, List<Feed.Video>> guide = new HashMap<>();
     private static final Map<String, Long> received = new HashMap<>();
     private static final LruCache<String, Bitmap> stills = new LruCache<>(60);
     private static int programme;
@@ -114,7 +91,7 @@ public class BroadcastActivity extends StateActivity {
     private LinearLayout chips, list;
     private TextView standby, caption, meta, signal;
     private WebView player;
-    private Video playing;
+    private Feed.Video playing;
     private View fullscreen;
     private WebChromeClient.CustomViewCallback leaveFullscreen;
     private final OnBackInvokedCallback backFromFullscreen = this::closeFullscreen;
@@ -150,7 +127,7 @@ public class BroadcastActivity extends StateActivity {
         String id = intent == null ? null : intent.getStringExtra(EXTRA_VIDEO_ID);
         if (id == null || !id.matches("[A-Za-z0-9_-]{11}")) return;
         intent.removeExtra(EXTRA_VIDEO_ID);
-        Video video = new Video();
+        Feed.Video video = new Feed.Video();
         video.id = id;
         String title = intent.getStringExtra(EXTRA_TITLE);
         video.title = title == null ? "" : title;
@@ -303,7 +280,7 @@ public class BroadcastActivity extends StateActivity {
             chip.setTextColor(i == p ? v.bg : v.accent);
         }
         if (p == LATER) {
-            List<Video> later = later();
+            List<Feed.Video> later = Feed.later(this);
             if (later.isEmpty()) {
                 list.removeAllViews();
                 signal.setOnClickListener(null);
@@ -324,13 +301,13 @@ public class BroadcastActivity extends StateActivity {
         signal.setText(t("RECEIVING THE PROGRAMME ...", "PROGRAMM WIRD EMPFANGEN ..."));
         signal.setOnClickListener(null);
         fetch.execute(() -> {
-            List<Video> videos;
+            List<Feed.Video> videos;
             try {
-                videos = parse(new String(bytes(FEEDS + feed, 2_000_000), StandardCharsets.UTF_8));
+                videos = Feed.parse(new String(Feed.bytes(FEEDS + feed, 2_000_000), StandardCharsets.UTF_8));
             } catch (Exception e) {
                 videos = null;
             }
-            List<Video> got = videos;
+            List<Feed.Video> got = videos;
             main.post(() -> {
                 if (isDestroyed() || programme != p) return;
                 if (got == null) {
@@ -347,15 +324,15 @@ public class BroadcastActivity extends StateActivity {
     }
 
     /** Lists a programme's videos. */
-    private void show(List<Video> videos) {
+    private void show(List<Feed.Video> videos) {
         signal.setOnClickListener(null);
         signal.setText(String.format(locale, t("%d TRANSMISSIONS ON THIS PROGRAMME", "%d SENDUNGEN IN DIESEM PROGRAMM"),
                 videos.size()));
         list.removeAllViews();
-        for (Video video : videos) list.addView(item(video));
+        for (Feed.Video video : videos) list.addView(item(video));
     }
 
-    private View item(Video video) {
+    private View item(Feed.Video video) {
         LinearLayout row = row();
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setPadding(0, dp(8), 0, dp(8));
@@ -371,7 +348,7 @@ public class BroadcastActivity extends StateActivity {
         } else {
             fetch.execute(() -> {
                 try {
-                    byte[] b = bytes("https://i.ytimg.com/vi/" + video.id + "/mqdefault.jpg", 500_000);
+                    byte[] b = Feed.bytes("https://i.ytimg.com/vi/" + video.id + "/mqdefault.jpg", 500_000);
                     Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, b.length);
                     if (bmp == null) return;
                     stills.put(video.id, bmp);
@@ -396,7 +373,7 @@ public class BroadcastActivity extends StateActivity {
         row.addView(words, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         row.setOnClickListener(view -> play(video));
         row.setOnLongClickListener(view -> {
-            boolean kept = toggleLater(video);
+            boolean kept = Feed.toggleLater(this, video);
             Toast.makeText(this, kept ? t("SET ASIDE FOR LATER.", "FÜR SPÄTER ZURÜCKGELEGT.")
                     : t("REMOVED FROM WATCH LATER.", "VON SPÄTER ANSEHEN ENTFERNT."), Toast.LENGTH_SHORT).show();
             if (programme == LATER) tune(LATER);
@@ -406,9 +383,9 @@ public class BroadcastActivity extends StateActivity {
         return row;
     }
 
-    private String facts(Video video) {
+    private String facts(Feed.Video video) {
         StringBuilder b = new StringBuilder();
-        if (isLater(video.id)) b.append("★  ");
+        if (Feed.isLater(this, video.id)) b.append("★  ");
         try {
             b.append(OffsetDateTime.parse(video.published)
                     .format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)).toUpperCase(locale));
@@ -419,7 +396,7 @@ public class BroadcastActivity extends StateActivity {
             b.append("  ·  ").append(NumberFormat.getIntegerInstance(locale).format(video.views))
                     .append(t(" VIEWS", " AUFRUFE"));
         }
-        int at = position(video.id);
+        int at = Feed.position(this, video.id);
         if (at > 0) {
             b.append("  ·  ").append(t("RESUMES AT ", "WEITER BEI "))
                     .append(String.format(Locale.ROOT, "%d:%02d", at / 60, at % 60));
@@ -429,8 +406,8 @@ public class BroadcastActivity extends StateActivity {
 
     // ---- The player -----------------------------------------------------------
 
-    private void play(Video video) {
-        Video before = playing;
+    private void play(Feed.Video video) {
+        Feed.Video before = playing;
         playing = video;
         restyle(before);
         restyle(video);
@@ -441,11 +418,11 @@ public class BroadcastActivity extends StateActivity {
         if (player == null) player = newPlayer();
         standby.setVisibility(View.GONE);
         player.setVisibility(View.VISIBLE);
-        player.loadDataWithBaseURL(ORIGIN + "/", page(video.id, position(video.id)), "text/html", "utf-8", null);
+        player.loadDataWithBaseURL(ORIGIN + "/", page(video.id, Feed.position(this, video.id)), "text/html", "utf-8", null);
     }
 
     /** Redraws a video's row after it starts or stops playing. */
-    private void restyle(Video video) {
+    private void restyle(Feed.Video video) {
         if (video == null) return;
         for (int i = 0; i < list.getChildCount(); i++) {
             View row = list.getChildAt(i);
@@ -531,18 +508,18 @@ public class BroadcastActivity extends StateActivity {
 
         @JavascriptInterface
         public void at(double seconds, double duration) {
-            Video video = playing;
+            Feed.Video video = playing;
             if (video == null) return;
             // The last half minute counts as seen; seen videos start from the beginning again.
             int at = duration > 0 && seconds > duration - 30 ? 0 : (int) seconds;
-            remember(video.id, at);
+            Feed.remember(BroadcastActivity.this, video.id, at);
         }
 
         @JavascriptInterface
         public void state(int state) {
             // 0 is the end. YouTube would offer more; the state offers silence.
-            Video video = playing;
-            if (state == 0 && video != null) remember(video.id, 0);
+            Feed.Video video = playing;
+            if (state == 0 && video != null) Feed.remember(BroadcastActivity.this, video.id, 0);
             if (state == 0) main.post(() -> {
                 switchOff();
                 standby(t("TRANSMISSION ENDED.\nREMAIN TUNED.", "SENDUNG BEENDET.\nBLEIBEN SIE EMPFANGSBEREIT."));
@@ -552,7 +529,7 @@ public class BroadcastActivity extends StateActivity {
 
     /** The video will not play here; for an embedding refusal, offer it alone in YouTube. */
     private void refused(int code) {
-        Video video = playing;
+        Feed.Video video = playing;
         switchOff();
         boolean embedding = code == 101 || code == 150 || code == 153;
         if (!embedding || video == null) {
@@ -608,127 +585,4 @@ public class BroadcastActivity extends StateActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         if (done != null) done.onCustomViewHidden();
     }
-
-    // ---- Resume and watch later -----------------------------------------------
-
-    private int position(String id) {
-        return getSharedPreferences(PREFS, MODE_PRIVATE).getInt("at." + id, 0);
-    }
-
-    private void remember(String id, int seconds) {
-        android.content.SharedPreferences p = getSharedPreferences(PREFS, MODE_PRIVATE);
-        if (seconds <= 5) p.edit().remove("at." + id).apply();
-        else p.edit().putInt("at." + id, seconds).apply();
-    }
-
-    /** The watch-later list, newest set aside first: lines of id, title, published. */
-    private List<Video> later() {
-        List<Video> out = new ArrayList<>();
-        for (String line : getSharedPreferences(PREFS, MODE_PRIVATE).getString("later", "").split("\n")) {
-            String[] f = line.split("\t", -1);
-            if (f.length < 3) continue;
-            Video video = new Video();
-            video.id = f[0];
-            video.title = f[1];
-            video.published = f[2].isEmpty() ? null : f[2];
-            out.add(video);
-        }
-        return out;
-    }
-
-    private boolean isLater(String id) {
-        for (Video video : later()) if (video.id.equals(id)) return true;
-        return false;
-    }
-
-    /** Adds the video to the list, or takes it off; returns whether it is on it now. */
-    private boolean toggleLater(Video video) {
-        List<Video> later = later();
-        boolean removed = later.removeIf(x -> x.id.equals(video.id));
-        if (!removed) later.add(0, video);
-        StringBuilder b = new StringBuilder();
-        for (Video x : later) {
-            if (b.length() > 0) b.append('\n');
-            b.append(x.id).append('\t').append(x.title.replace('\t', ' ').replace('\n', ' '))
-                    .append('\t').append(x.published == null ? "" : x.published);
-        }
-        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("later", b.toString()).apply();
-        return !removed;
-    }
-
-    // ---- The feed -------------------------------------------------------------
-
-    /** Reads an Atom feed from YouTube, keeping only the channel's own videos. */
-    static List<Video> parse(String xml) throws Exception {
-        XmlPullParser p = Xml.newPullParser();
-        // Keep the prefixes: "yt:videoId", "media:statistics".
-        p.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-        p.setInput(new StringReader(xml));
-        List<Video> out = new ArrayList<>();
-        Video entry = null;
-        String channel = null;
-        for (int e = p.getEventType(); e != XmlPullParser.END_DOCUMENT; e = p.next()) {
-            if (e == XmlPullParser.START_TAG) {
-                String tag = p.getName();
-                if ("entry".equals(tag)) {
-                    entry = new Video();
-                    channel = null;
-                } else if (entry != null) {
-                    switch (tag) {
-                        case "yt:videoId": entry.id = p.nextText().trim(); break;
-                        case "yt:channelId": channel = p.nextText().trim(); break;
-                        case "title": entry.title = plain(p.nextText()); break;
-                        case "published": entry.published = p.nextText().trim(); break;
-                        case "media:statistics":
-                            try {
-                                entry.views = Long.parseLong(p.getAttributeValue(null, "views"));
-                            } catch (NumberFormatException ignored) {
-                                // Unknown.
-                            }
-                            break;
-                        default: break;
-                    }
-                }
-            } else if (e == XmlPullParser.END_TAG && "entry".equals(p.getName()) && entry != null) {
-                if (CHANNEL.equals(channel) && entry.id != null && entry.id.matches("[A-Za-z0-9_-]{11}")
-                        && entry.title != null) {
-                    out.add(entry);
-                }
-                entry = null;
-            }
-        }
-        return out;
-    }
-
-    /** The title without the band's name in front: on this channel there is no other band. */
-    private static String plain(String title) {
-        String t = title.trim();
-        String lower = t.toLowerCase(Locale.ROOT);
-        for (String prefix : new String[]{"laibach - ", "laibach – ", "laibach — ", "laibach: "}) {
-            if (lower.startsWith(prefix)) return t.substring(prefix.length()).trim();
-        }
-        return t;
-    }
-
-    static byte[] bytes(String url, int limit) throws Exception {
-        HttpURLConnection c = (HttpURLConnection) URI.create(url).toURL().openConnection();
-        c.setConnectTimeout(10_000);
-        c.setReadTimeout(15_000);
-        c.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) LaibachLauncher");
-        try (InputStream in = c.getInputStream()) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buf = new byte[16384];
-            int n;
-            while ((n = in.read(buf)) > 0) {
-                out.write(buf, 0, n);
-                if (out.size() > limit) throw new IllegalStateException("too large");
-            }
-            return out.toByteArray();
-        } finally {
-            c.disconnect();
-        }
-    }
-
-    // ---- Helpers ------------------------------------------------------------
-
 }

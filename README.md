@@ -69,7 +69,7 @@ default.
 |---|---|
 | **Package** | `dev.laibach.launcher` |
 | **Version** | 2.8, *The Exchange* |
-| **Source** | 74 Java files, no libraries, no Gradle |
+| **Source** | 102 Java files, no libraries, no Gradle |
 | **Size** | about 247 KB |
 | **Requires** | Android 12 (API 31) or later |
 
@@ -123,13 +123,18 @@ of the home screen extends `HomePart` and draws with the shared tools in
 
 | Organ | Files |
 |---|---|
-| **Screens** | `StateActivity` (shared uniform and type), `HomeActivity`, `PapersActivity`, `LockActivity`, `CensorActivity`, `DarkroomActivity`, `VolkskunstActivity`, `BroadcastActivity`, `AlarmActivity` |
-| **Home screen parts** | `HomePart` (base), `Ledger` (number, standing, ration, life force), `Decrees`, `OnAir`, `ArtCredit`, `News` (the ticker's text), `Weather` (the sun, from the clock alone), `Curfew`, `RollCall`, `DeadDrop`, `Regulations` |
+| **Screens** | `StateActivity` (shared uniform and type), `HomeActivity`, `PapersActivity`, `LockActivity`, `CensorActivity`, `DarkroomActivity`, `VolkskunstActivity`, `BroadcastActivity`, `ExchangeActivity`, `AlarmActivity` |
+| **Home screen parts** | `HomePart` (base), `Masthead` (emblem, network, uniform, device line), `Monument` (clock, date, proclamation), `Register` (the programme list, its filter and footer), `Command` (ticker and command line), `Ledger` (number, standing, ration, life force), `Decrees`, `OnAir`, `ArtCredit`, `News` (the ticker's text), `Weather` (the sun, from the clock alone), `Curfew`, `RollCall`, `DeadDrop`, `Regulations`, `Slogans` |
+| **The papers** | `PapersPart` (base), `PapersCard` (the identity card), `PapersFigures`, `PapersAlbum`, `PapersDesk`, `PapersExports`, `PapersRecord`, `Passport` |
 | **Programmes** | `App`, `ProgrammeAdapter` (rows, grids, ministry headers), `Counter` (opening a programme past the quotas, the ration, the queue and the coupons), `WaitingRoom`, `ProgrammeMenu`, `Ministry`, `Quotas`, `Formation` |
-| **Menus and orders** | `GearMenu`, `Orders`, `CallUps`, `PowerRation`, `StateMenu` |
-| **Sound** | `Tones` (every sound, synthesised), `Hourly` (the anthem of the hour), `Morse` |
-| **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Backdrop`, `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
-| **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Exports`, `ExitVisa` |
+| **Menus and orders** | `GearMenu`, `Orders`, `CallUps`, `PowerRation`, `StateMenu`, `Tiles` (quick-settings switches) |
+| **The lock** | `Terminal` (the seal's policy), `Seal` (the hold-to-unlock seal), `Dots`, `LockWallpaper` |
+| **Broadcast and news** | `Feed` (the channel's Atom feeds, resume and watch later), `Bulletins` (concerts and news), `WallArt` (the approved art of the day), `DecreeListener` (counts notifications, never reads them) |
+| **Darkroom and art** | `Censor` (develops and redacts), `Plate` (the photograph on the table), `Specimen` (the drawn test subject), `DarkroomProvider`, `TextCensor`, `PosterPress`, `Wall` (the Volkskunst gallery wall) |
+| **Sound** | `Tones` (every sound, synthesised), `Anthems` (the sounds handed to the system), `Hourly` (the anthem of the hour), `Morse`, `Alarm` (reveille) |
+| **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Variant` (the uniforms), `Backdrop`, `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
+| **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Drills`, `Comrades`, `Qr`, `ExitVisa` |
+| **Copies that leave** | `Exports` (cards, pictures, sharing), `CaseFile` (the PDF case file), `Backup` (settings saved and restored) |
 | **Honours** | `Stamps` (the album), `StampArt` (glyphs, stamps and medals), `Ceremony`, `Promotion`, `Foundation` |
 | **Language** | `Lang`, `Slovene` (every English string has its Slovenian) |
 
@@ -360,7 +365,7 @@ Twenty-one, each in English and German. Among them:
 > THE STATE ■ SLEEP IS A CIVIC DUTY ■ A QUIET PHONE IS A LOYAL PHONE ■
 > EVERYTHING IS PERMITTED. EVERYTHING IS NOTED.
 
-They are kept in `SLOGANS` in `HomeActivity.java`, each as an English–German
+They are kept in `HOME` in `Slogans.java`, each as an English–German
 pair. Amendments are made there.
 
 <a id="uniforms"></a>

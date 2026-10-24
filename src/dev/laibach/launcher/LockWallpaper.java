@@ -152,7 +152,7 @@ final class LockWallpaper {
 
         // Above the motto: the proclamation of the day, under the plan day's number.
         int day = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
-        String[] slogan = HomeActivity.SLOGANS[day % HomeActivity.SLOGANS.length];
+        String[] slogan = Slogans.HOME[day % Slogans.HOME.length];
         String sloganText = Lang.pick(german, slogan);
         TextPaint daily = new TextPaint(motto);
         daily.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));

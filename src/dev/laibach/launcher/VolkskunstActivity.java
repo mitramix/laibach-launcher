@@ -1,26 +1,15 @@
 package dev.laibach.launcher;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Insets;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,15 +20,10 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
-import android.view.GestureDetector;
 import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.WindowInsetsController;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -56,10 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * Volkskunst: the owner's own pictures, framed and shown in greyscale, one at a
@@ -119,7 +100,16 @@ public class VolkskunstActivity extends StateActivity {
     private View buildUi() {
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(v.bg);
-        wall = new Wall(this);
+        wall = new Wall(this, v, new Wall.Host() {
+            @Override public int size() { return works.size(); }
+            @Override public File picture(int i) { return new File(dir, works.get(i).file); }
+            @Override public int index() { return index; }
+            @Override public void turned(int step) {
+                index += step;
+                show();
+            }
+            @Override public void held() { describe(); }
+        });
         root.addView(wall);
 
         LinearLayout chrome = new LinearLayout(this);
@@ -443,189 +433,5 @@ public class VolkskunstActivity extends StateActivity {
                 })
                 .setNegativeButton(t("Cancel", "Abbrechen"), null)
                 .show(), v);
-    }
-
-    // ---- The wall -----------------------------------------------------------
-
-    /**
-     * Draws the current picture and its neighbours side by side, each in a frame,
-     * and follows the finger: swipe for the next or previous one, long-press to
-     * write a caption.
-     */
-    private final class Wall extends View {
-        private final Map<String, Bitmap> cache = new HashMap<>();
-        private final Paint picture = new Paint(Paint.FILTER_BITMAP_FLAG);
-        private final Paint fill = new Paint();
-        private final RectF rect = new RectF();
-        private final GestureDetector gestures;
-        private final float frame = dp(10), gap = dp(3), margin = dp(26);
-        private VelocityTracker velocity;
-        private ValueAnimator settle;
-        private float downX, offset;
-        private int top, bottom;
-
-        Wall(Context context) {
-            super(context);
-            ColorMatrix grey = new ColorMatrix();
-            grey.setSaturation(0f);
-            // A little extra contrast, like a photocopy.
-            float c = 1.18f, t = (1 - c) * 127.5f;
-            grey.postConcat(new ColorMatrix(new float[]{
-                    c, 0, 0, 0, t,
-                    0, c, 0, 0, t,
-                    0, 0, c, 0, t,
-                    0, 0, 0, 1, 0}));
-            picture.setColorFilter(new ColorMatrixColorFilter(grey));
-            gestures = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (Math.abs(offset) < dp(8)) describe();
-                }
-            });
-        }
-
-        void setBounds(int top, int bottom) {
-            this.top = top;
-            this.bottom = bottom;
-            invalidate();
-        }
-
-        /** Drops cached pictures after the collection changed. */
-        void forget() {
-            for (Bitmap b : cache.values()) b.recycle();
-            cache.clear();
-            offset = 0;
-        }
-
-        private Bitmap bitmap(int i) {
-            String file = works.get(i).file;
-            Bitmap b = cache.get(file);
-            if (b == null) {
-                b = BitmapFactory.decodeFile(new File(dir, file).getPath());
-                if (b != null) cache.put(file, b);
-            }
-            return b;
-        }
-
-        /** Keeps only the current picture and its two neighbours in memory. */
-        private void trim() {
-            List<String> keep = new ArrayList<>();
-            for (int i = index - 1; i <= index + 1; i++) {
-                if (i >= 0 && i < works.size()) keep.add(works.get(i).file);
-            }
-            cache.entrySet().removeIf(e -> {
-                if (keep.contains(e.getKey())) return false;
-                e.getValue().recycle();
-                return true;
-            });
-        }
-
-        @Override
-        protected void onDraw(Canvas c) {
-            if (works.isEmpty()) return;
-            int w = getWidth();
-            for (int i = index - 1; i <= index + 1; i++) {
-                if (i < 0 || i >= works.size()) continue;
-                float left = (i - index) * w + offset;
-                if (left >= w || left <= -w) continue;
-                Bitmap b = bitmap(i);
-                if (b != null) drawFramed(c, b, left, w);
-            }
-        }
-
-        private void drawFramed(Canvas c, Bitmap b, float left, int w) {
-            float border = frame + gap;
-            float availW = w - 2 * (margin + border);
-            float availH = getHeight() - top - bottom - 2 * border;
-            if (availW <= 0 || availH <= 0) return;
-            float s = Math.min(availW / b.getWidth(), availH / b.getHeight());
-            float pw = b.getWidth() * s, ph = b.getHeight() * s;
-            float x = left + (w - pw) / 2f, y = top + (getHeight() - top - bottom - ph) / 2f;
-            // Frame in ink, a thin line of background, then the picture.
-            fill.setColor(v.ink);
-            rect.set(x - border, y - border, x + pw + border, y + ph + border);
-            c.drawRect(rect, fill);
-            fill.setColor(v.bg);
-            rect.set(x - gap, y - gap, x + pw + gap, y + ph + gap);
-            c.drawRect(rect, fill);
-            rect.set(x, y, x + pw, y + ph);
-            c.drawBitmap(b, null, rect, picture);
-        }
-
-        @Override
-        public boolean onTouchEvent(MotionEvent e) {
-            if (works.isEmpty()) return false;
-            gestures.onTouchEvent(e);
-            switch (e.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    if (settle != null) settle.cancel();
-                    velocity = VelocityTracker.obtain();
-                    velocity.addMovement(e);
-                    downX = e.getX() - offset;
-                    return true;
-                case MotionEvent.ACTION_MOVE: {
-                    velocity.addMovement(e);
-                    float dx = e.getX() - downX;
-                    boolean edge = (dx > 0 && index == 0) || (dx < 0 && index == works.size() - 1);
-                    offset = edge ? dx / 3 : dx;
-                    invalidate();
-                    return true;
-                }
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL: {
-                    velocity.addMovement(e);
-                    velocity.computeCurrentVelocity(1000);
-                    float vx = velocity.getXVelocity();
-                    velocity.recycle();
-                    velocity = null;
-                    int w = getWidth();
-                    boolean fling = Math.abs(vx) > dp(600);
-                    int step = 0;
-                    if ((offset < -w / 5f || (fling && vx < 0)) && index < works.size() - 1) step = 1;
-                    if ((offset > w / 5f || (fling && vx > 0)) && index > 0) step = -1;
-                    slide(step);
-                    return true;
-                }
-                default:
-                    return false;
-            }
-        }
-
-        /** Animates to the next (1), previous (-1) or the same (0) picture. */
-        private void slide(int step) {
-            float target = -step * getWidth();
-            settle = ValueAnimator.ofFloat(offset, target);
-            settle.setDuration(220);
-            settle.setInterpolator(new DecelerateInterpolator());
-            settle.addUpdateListener(a -> {
-                offset = (float) a.getAnimatedValue();
-                invalidate();
-            });
-            settle.addListener(new AnimatorListenerAdapter() {
-                private boolean cancelled;
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    cancelled = true;
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (cancelled || step == 0) return;
-                    index += step;
-                    offset = 0;
-                    trim();
-                    show();
-                }
-            });
-            settle.start();
-        }
-
-        @Override
-        protected void onDetachedFromWindow() {
-            if (settle != null) settle.cancel();
-            forget();
-            super.onDetachedFromWindow();
-        }
     }
 }

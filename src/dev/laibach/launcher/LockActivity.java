@@ -1,31 +1,21 @@
 package dev.laibach.launcher;
 
-import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Canvas;
-import android.graphics.DashPathEffect;
 import android.graphics.Insets;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.media.AudioManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -37,7 +27,6 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * The sealed terminal: put in front of the phone's own lock screen whenever the
@@ -49,31 +38,7 @@ import java.util.Locale;
  * Switched off and on in the long-press menu (Public order → the terminal).
  */
 public class LockActivity extends StateActivity {
-    private static final String KEY_SEAL = "seal";
-    private static final long HOLD = 1_400;
-    /** Touches that began this soon after the screen came to the citizen are not theirs yet. */
-    private static final long SETTLE = 600;
-
-    /** Proclamations of the sealed terminal, English and German in step; a new one at every waking. */
-    private static final String[][] SLOGANS = {
-            {"THIS DEVICE IS PROPERTY OF THE STATE. YOU ARE ITS GUEST.", "DIESES GERÄT IST EIGENTUM DES STAATES. SIE SIND SEIN GAST."},
-            {"THE SCREEN WAS DARK. THE STATE WAS NOT.", "DER BILDSCHIRM WAR DUNKEL. DER STAAT NICHT."},
-            {"WHILE YOU WERE AWAY, NOTHING HAPPENED. OFFICIALLY.", "WÄHREND SIE WEG WAREN, GESCHAH NICHTS. OFFIZIELL."},
-            {"TO ENTER IS TO AGREE.", "WER EINTRITT, STIMMT ZU."},
-            {"YOUR FACE IS YOUR PASSWORD. YOUR PASSWORD IS OURS.", "IHR GESICHT IST IHR PASSWORT. IHR PASSWORT IST UNSERES."},
-            {"THE LOCK PROTECTS YOU FROM YOURSELF.", "DAS SCHLOSS SCHÜTZT SIE VOR SICH SELBST."},
-            {"EVERY UNLOCK IS A RENEWED OATH.", "JEDES ENTSPERREN IST EIN ERNEUERTER EID."},
-            {"THE MACHINE WAS DREAMING OF YOU.", "DIE MASCHINE HAT VON IHNEN GETRÄUMT."},
-            {"NO NEW MESSAGES. THE COLLECTIVE HAS SAID EVERYTHING.", "KEINE NEUEN NACHRICHTEN. DAS KOLLEKTIV HAT ALLES GESAGT."},
-            {"SUBMISSION IS THE FASTEST WAY IN.", "UNTERWERFUNG IST DER SCHNELLSTE WEG HINEIN."},
-            {"THE FUTURE IS LOCKED. YOU HOLD THE KEY. WE HOLD YOU.", "DIE ZUKUNFT IST VERSCHLOSSEN. SIE HALTEN DEN SCHLÜSSEL. WIR HALTEN SIE."},
-    };
-
-    /** True while the terminal is on screen, so the home screen does not charge the time spent here. */
-    static boolean sealed;
-    /** Called once the citizen is let back in; the home screen starts counting from there. */
-    static Runnable onUnseal;
-    private static int slogan = (int) (System.currentTimeMillis() / 60_000) % SLOGANS.length;
+    private static int slogan = (int) (System.currentTimeMillis() / 60_000) % Slogans.LOCK.length;
 
     private TextView clock, date, power, standing, submissions, curfew, proclamation, caption;
     private Ticker ticker;
@@ -83,30 +48,6 @@ public class LockActivity extends StateActivity {
     /** When this window last got the input focus, on the uptime clock. */
     private long focusedAt = Long.MAX_VALUE;
     private boolean unsealing;
-
-    // ---- Who puts the terminal up -------------------------------------------
-
-    static boolean enabled(Context c) {
-        return c.getSharedPreferences(Variant.PREFS, MODE_PRIVATE).getBoolean(KEY_SEAL, true);
-    }
-
-    static void setEnabled(Context c, boolean on) {
-        c.getSharedPreferences(Variant.PREFS, MODE_PRIVATE).edit().putBoolean(KEY_SEAL, on).apply();
-    }
-
-    /** Puts the terminal up as the screen goes off, unless a call is on (the screen also goes off at the ear). */
-    static void seal(Context c) {
-        if (!enabled(c)) return;
-        int mode = c.getSystemService(AudioManager.class).getMode();
-        if (mode == AudioManager.MODE_IN_CALL || mode == AudioManager.MODE_IN_COMMUNICATION
-                || mode == AudioManager.MODE_RINGTONE) return;
-        try {
-            c.startActivity(new Intent(c, LockActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION));
-        } catch (RuntimeException e) {
-            // The system may refuse; the phone's own lock is there either way.
-        }
-    }
 
     /**
      * Where the phone's in-display fingerprint sensor sits, in this window's pixels,
@@ -170,13 +111,13 @@ public class LockActivity extends StateActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         // Sealed again while already sealed: a new proclamation for the new waking.
-        slogan = (slogan + 1) % SLOGANS.length;
+        slogan = (slogan + 1) % Slogans.LOCK.length;
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        sealed = true;
+        Terminal.sealed = true;
         unsealing = false;
         IntentFilter tick = new IntentFilter(Intent.ACTION_TIME_TICK);
         tick.addAction(Intent.ACTION_TIME_CHANGED);
@@ -198,7 +139,7 @@ public class LockActivity extends StateActivity {
 
     @Override
     protected void onDestroy() {
-        sealed = false;
+        Terminal.sealed = false;
         super.onDestroy();
     }
 
@@ -292,8 +233,8 @@ public class LockActivity extends StateActivity {
 
     @SuppressWarnings("deprecation")
     private void letIn() {
-        sealed = false;
-        if (onUnseal != null) onUnseal.run();
+        Terminal.sealed = false;
+        if (Terminal.onUnseal != null) Terminal.onUnseal.run();
         finish();
         overridePendingTransition(0, android.R.anim.fade_out);
     }
@@ -362,8 +303,8 @@ public class LockActivity extends StateActivity {
         proclamation.setLineSpacing(0, 1.15f);
         proclamation.setPadding(0, dp(12), 0, 0);
         proclamation.setOnClickListener(view -> {
-            slogan = (slogan + 1) % SLOGANS.length;
-            proclamation.setText(Lang.pick(german, SLOGANS[slogan]));
+            slogan = (slogan + 1) % Slogans.LOCK.length;
+            proclamation.setText(Lang.pick(german, Slogans.LOCK[slogan]));
         });
         body.addView(proclamation);
         root.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
@@ -378,7 +319,25 @@ public class LockActivity extends StateActivity {
         root.addView(caption, fullWidth());
 
         FrameLayout dock = new FrameLayout(this);
-        seal = new Seal(this);
+        seal = new Seal(this, v, new Seal.Host() {
+            @Override public boolean overSensor() { return fingerprint; }
+            @Override public long focusedAt() { return focusedAt; }
+            @Override public void holding() {
+                caption.setTextColor(v.glow);
+                caption.setText(t("SUBMITTING…", "UNTERWERFUNG LÄUFT…"));
+            }
+            @Override public void hesitated(boolean early) {
+                caption.setTextColor(v.accent);
+                caption.setText(early
+                        ? t("OBEDIENCE TAKES A MOMENT. HOLD.", "GEHORSAM BRAUCHT EINEN MOMENT. HALTEN.")
+                        : t("HESITATION HAS BEEN NOTED.", "ZÖGERN WURDE VERMERKT."));
+            }
+            @Override public void submitted(boolean toSensor) {
+                if (toSensor) LockActivity.this.submitted(t("PRESENT YOUR FINGER TO THE STATE.", "LEGEN SIE DEM STAAT IHREN FINGER VOR."), 250);
+                else LockActivity.this.submitted();
+            }
+        });
+        seal.setContentDescription(t("Seal. Touch and hold to unlock.", "Siegel. Berühren und halten zum Entsperren."));
         Rect finger = sensor();
         int size = seal.size = dp(finger != null ? 136 : 168);
         if (finger == null) {
@@ -418,7 +377,7 @@ public class LockActivity extends StateActivity {
         dotsAt.leftMargin = dp(6);
         dotsAt.rightMargin = dp(6);
         dotsAt.bottomMargin = dp(3);
-        line.addView(new Dots(this), dotsAt);
+        line.addView(new Dots(this, v.muted), dotsAt);
         TextView value = mono(11, v.ink);
         line.addView(value);
         into.addView(line);
@@ -432,7 +391,7 @@ public class LockActivity extends StateActivity {
         standing.setText(Lang.pick(german, Citizen.STANDING[grade]));
         standing.setTextColor(grade >= 3 ? v.accent : v.ink);
         submissions.setText(String.valueOf(Citizen.unseals(this)));
-        proclamation.setText(Lang.pick(german, SLOGANS[slogan]));
+        proclamation.setText(Lang.pick(german, Slogans.LOCK[slogan]));
         caption.setTextColor(v.accent);
         caption.setText(fingerprint
                 ? t("TOUCH THE SEAL, THEN PRESENT YOUR FINGER", "SIEGEL BERÜHREN, DANN FINGER VORLEGEN")
@@ -486,179 +445,5 @@ public class LockActivity extends StateActivity {
         t.setLetterSpacing(0.06f);
         t.setMaxLines(1);
         return t;
-    }
-
-    /** The dotted leader between a label and its value. */
-    private final class Dots extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        Dots(Context context) {
-            super(context);
-            paint.setColor(v.muted);
-        }
-
-        @Override
-        protected void onDraw(Canvas c) {
-            float step = dp(5), r = Math.max(1f, dp(1));
-            for (float x = r; x < getWidth(); x += step) c.drawCircle(x, getHeight() - r, r, paint);
-        }
-    }
-
-    /**
-     * The seal of the state: the emblem's wheel turning inside a dashed ring.
-     * Held down, a ring of light closes around it; once it is closed the
-     * citizen has submitted. Let go early and it opens again.
-     */
-    private final class Seal extends Fx.FxView {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Paint ring = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Path wheel = new Path();
-        private final RectF arc = new RectF();
-        private long pressedAt;
-        private boolean done;
-        int size;
-
-        Seal(Context context) {
-            super(context, LockActivity.this.v);
-            ring.setStyle(Paint.Style.STROKE);
-            ring.setStrokeCap(Paint.Cap.ROUND);
-            setContentDescription(t("Seal. Touch and hold to unlock.", "Siegel. Berühren und halten zum Entsperren."));
-            setClickable(true);
-        }
-
-        @Override
-        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-            float r = Math.min(w, h) / 2f;
-            Cyber.emblem(wheel, 0, 0, r * 0.62f, v);
-            float inset = 4 * dp;
-            arc.set(inset, inset, w - inset, h - inset);
-        }
-
-        private float progress() {
-            return pressedAt == 0 ? 0 : Math.min(1f, (Fx.now() - pressedAt) / (float) HOLD);
-        }
-
-        @Override
-        public boolean onTouchEvent(MotionEvent e) {
-            switch (e.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    // Pockets, palms and the finger still on the sensor from waking do not submit.
-                    if (!deliberate(e)) return false;
-                    if (fingerprint) {
-                        // Some systems stop the sensor while the seal covers the lock, so
-                        // the first touch hands over to the phone's lock, which starts it again.
-                        done = true;
-                        performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-                        submitted(t("PRESENT YOUR FINGER TO THE STATE.", "LEGEN SIE DEM STAAT IHREN FINGER VOR."), 250);
-                        return true;
-                    }
-                    pressedAt = Fx.now();
-                    done = false;
-                    performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                    caption.setTextColor(v.glow);
-                    caption.setText(t("SUBMITTING…", "UNTERWERFUNG LÄUFT…"));
-                    postInvalidateOnAnimation();
-                    return true;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    if (!done && pressedAt != 0) {
-                        caption.setTextColor(v.accent);
-                        caption.setText(e.getActionMasked() == MotionEvent.ACTION_UP && progress() < 0.25f
-                                ? t("OBEDIENCE TAKES A MOMENT. HOLD.", "GEHORSAM BRAUCHT EINEN MOMENT. HALTEN.")
-                                : t("HESITATION HAS BEEN NOTED.", "ZÖGERN WURDE VERMERKT."));
-                    }
-                    pressedAt = 0;
-                    invalidate();
-                    return true;
-                case MotionEvent.ACTION_MOVE:
-                    // Sliding off the seal is letting go.
-                    if (pressedAt != 0 && !done && (e.getPointerCount() > 1 || !inside(e.getX(), e.getY()))) {
-                        caption.setTextColor(v.accent);
-                        caption.setText(t("HESITATION HAS BEEN NOTED.", "ZÖGERN WURDE VERMERKT."));
-                        release();
-                    }
-                    return true;
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    if (!done) release();
-                    return true;
-                default:
-                    return true;
-            }
-        }
-
-        private boolean deliberate(MotionEvent e) {
-            return hasWindowFocus()
-                    && getContext().getSystemService(PowerManager.class).isInteractive()
-                    && e.getDownTime() >= focusedAt + SETTLE
-                    && inside(e.getX(), e.getY());
-        }
-
-        /** Whether a point lies on the seal's disc, not just in its square. */
-        private boolean inside(float x, float y) {
-            float r = Math.min(getWidth(), getHeight()) / 2f;
-            return Math.hypot(x - getWidth() / 2f, y - getHeight() / 2f) <= r * 0.9f;
-        }
-
-        /** Lets go of the seal without submitting. */
-        void release() {
-            if (pressedAt == 0) return;
-            pressedAt = 0;
-            invalidate();
-        }
-
-        @Override
-        public boolean performClick() {
-            // For accessibility services, a click is a full submission.
-            super.performClick();
-            submitted();
-            return true;
-        }
-
-        @Override
-        protected void onDraw(Canvas c) {
-            int w = getWidth(), h = getHeight();
-            float cx = w / 2f, cy = h / 2f, r = Math.min(w, h) / 2f;
-            long t = Fx.now();
-            boolean moving = Fx.enabled(getContext());
-            float p = progress();
-
-            // The dashed outer ring turns against the wheel.
-            ring.setStrokeWidth(2 * dp);
-            ring.setPathEffect(new DashPathEffect(new float[]{6 * dp, 5 * dp}, moving ? -t / 40f : 0));
-            ring.setColor(Cyber.alpha(v.glow, 0x70));
-            c.drawCircle(cx, cy, r * 0.84f, ring);
-            ring.setPathEffect(null);
-
-            c.save();
-            c.translate(cx, cy);
-            c.rotate(moving ? t / 60f % 360 : 0);
-            paint.setColor(v.ink);
-            c.drawPath(wheel, paint);
-            c.restore();
-
-            // The disc glows brighter the longer it is held.
-            float beat = moving ? 0.5f + 0.5f * (float) Math.sin(t / 400.0) : 0.5f;
-            paint.setColor(Cyber.blend(v.accent, v.glow, p * 0.5f));
-            paint.setShadowLayer(r * (0.08f + 0.12f * beat + 0.3f * p), 0, 0, v.glow);
-            c.drawCircle(cx, cy, r * 0.4f, paint);
-            paint.clearShadowLayer();
-            paint.setColor(v.bg);
-            float arm = r * 0.16f, half = r * 0.06f;
-            c.drawRect(cx - half, cy - arm, cx + half, cy + arm, paint);
-            c.drawRect(cx - arm, cy - half, cx + arm, cy + half, paint);
-
-            if (p > 0) {
-                ring.setStrokeWidth(5 * dp);
-                ring.setColor(v.glow);
-                c.drawArc(arc, -90, 360 * p, false, ring);
-                if (p >= 1 && !done && hasWindowFocus()) {
-                    done = true;
-                    performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-                    submitted();
-                } else if (p < 1) {
-                    postInvalidateOnAnimation();
-                }
-            }
-        }
     }
 }

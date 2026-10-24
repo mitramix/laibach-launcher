@@ -58,7 +58,7 @@ final class Bulletins {
             SharedPreferences.Editor e = p.edit();
             if (tour) {
                 try {
-                    String json = new String(BroadcastActivity.bytes(TOUR, 1_500_000), StandardCharsets.UTF_8);
+                    String json = new String(Feed.bytes(TOUR, 1_500_000), StandardCharsets.UTF_8);
                     e.putString("tour", compact(json)).putLong("tourAt", now);
                 } catch (Exception ignored) {
                     // The old orders stand.
@@ -66,8 +66,8 @@ final class Bulletins {
             }
             if (tv) {
                 try {
-                    List<BroadcastActivity.Video> videos = BroadcastActivity.parse(new String(BroadcastActivity.bytes(
-                            "https://www.youtube.com/feeds/videos.xml?channel_id=" + BroadcastActivity.CHANNEL, 2_000_000),
+                    List<Feed.Video> videos = Feed.parse(new String(Feed.bytes(
+                            "https://www.youtube.com/feeds/videos.xml?channel_id=" + Feed.CHANNEL, 2_000_000),
                             StandardCharsets.UTF_8));
                     if (!videos.isEmpty()) {
                         e.putString("tv", videos.get(0).id + "\t" + videos.get(0).title).putLong("tvAt", now);
@@ -80,7 +80,7 @@ final class Bulletins {
             String[] latest = latestTv(c);
             if (latest != null && !latest[0].equals(stillId)) {
                 try {
-                    byte[] b = BroadcastActivity.bytes("https://i.ytimg.com/vi/" + latest[0] + "/mqdefault.jpg", 500_000);
+                    byte[] b = Feed.bytes("https://i.ytimg.com/vi/" + latest[0] + "/mqdefault.jpg", 500_000);
                     Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, b.length);
                     if (bmp != null) {
                         still = bmp;

@@ -82,7 +82,7 @@ final class Regulations extends HomePart {
 
         section(page, t("LOCK SCREEN", "SPERRBILDSCHIRM"));
         toggle(page, t("Seal", "Siegel"), t("the state's seal before the phone's own lock",
-                "das Siegel des Staates vor der Sperre des Telefons"), LockActivity.enabled(home), 16);
+                "das Siegel des Staates vor der Sperre des Telefons"), Terminal.enabled(home), 16);
         toggle(page, t("Uniform on the lock screen", "Uniform auf dem Sperrbildschirm"),
                 t("the lock screen's picture in the uniform", "das Bild des Sperrbildschirms in der Uniform"),
                 LockWallpaper.dressed(home), 17);

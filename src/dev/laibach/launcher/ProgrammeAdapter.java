@@ -20,6 +20,7 @@ import java.util.Locale;
 /** Draws the register: a programme to a row, a floor of a grid, or a ministry over its programmes. */
 final class ProgrammeAdapter extends BaseAdapter {
     final HomeActivity home;
+    final Register register;
     final Variant v;
     final boolean german;
     final Locale locale;
@@ -29,29 +30,30 @@ final class ProgrammeAdapter extends BaseAdapter {
         final List<App> apps = new ArrayList<>();
     }
 
-    ProgrammeAdapter(HomeActivity home) {
-        this.home = home;
+    ProgrammeAdapter(Register register) {
+        this.register = register;
+        this.home = register.home;
         this.v = home.v;
         this.german = home.german;
         this.locale = home.locale;
     }
 
-    @Override public int getCount() { return home.rows.size(); }
-    @Override public Object getItem(int i) { return home.rows.get(i); }
+    @Override public int getCount() { return register.rows.size(); }
+    @Override public Object getItem(int i) { return register.rows.get(i); }
     @Override public long getItemId(int i) { return i; }
     @Override public int getViewTypeCount() { return 3; }
     @Override public int getItemViewType(int i) {
-        Object o = home.rows.get(i);
+        Object o = register.rows.get(i);
         return o instanceof App ? 0 : o instanceof Ministry ? 1 : 2;
     }
     // A floor is not one item: each of its programmes answers for itself.
-    @Override public boolean isEnabled(int i) { return home.rows.get(i) instanceof App; }
+    @Override public boolean isEnabled(int i) { return register.rows.get(i) instanceof App; }
     @Override public boolean areAllItemsEnabled() { return false; }
 
     @Override
     public View getView(int i, View convertView, ViewGroup parent) {
-        if (home.rows.get(i) instanceof Ministry) return header((Ministry) home.rows.get(i), (LinearLayout) convertView);
-        if (home.rows.get(i) instanceof Floor) return floor((Floor) home.rows.get(i), (LinearLayout) convertView);
+        if (register.rows.get(i) instanceof Ministry) return header((Ministry) register.rows.get(i), (LinearLayout) convertView);
+        if (register.rows.get(i) instanceof Floor) return floor((Floor) register.rows.get(i), (LinearLayout) convertView);
         boolean terminal = home.formation.list == Formation.TERMINAL;
         LinearLayout row = (LinearLayout) convertView;
         if (row == null) {
@@ -64,7 +66,7 @@ final class ProgrammeAdapter extends BaseAdapter {
             row.addView(number);
             ImageView icon = new ImageView(home);
             if (!home.formation.icons) icon.setVisibility(View.GONE);
-            row.addView(icon, new LinearLayout.LayoutParams(home.iconPx, home.iconPx));
+            row.addView(icon, new LinearLayout.LayoutParams(register.iconPx, register.iconPx));
             // A register has room for a wide name; a parade sets it narrow, heavy and large.
             boolean parade = home.formation.list == Formation.LABELS;
             TextView label = home.type(home.formation.labelSp, v.ink, parade ? 25 : 40, parade ? 900 : 800);
@@ -87,14 +89,14 @@ final class ProgrammeAdapter extends BaseAdapter {
                 serial.setTypeface(Typeface.MONOSPACE);
             }
         }
-        App a = (App) home.rows.get(i);
-        int n = home.shown.indexOf(a);
+        App a = (App) register.rows.get(i);
+        int n = register.shown.indexOf(a);
         TextView number = (TextView) row.getChildAt(0);
         ImageView icon = (ImageView) row.getChildAt(1);
         TextView label = (TextView) row.getChildAt(2);
-        boolean first = home.querying && n == 0;
+        boolean first = register.querying && n == 0;
         number.setText(first ? "▶" : String.format(locale, "%02d", n + 1));
-        if (home.formation.icons) icon.setImageDrawable(home.iconFor(a));
+        if (home.formation.icons) icon.setImageDrawable(register.iconFor(a));
         label.setText((terminal ? "> " : "") + a.label.toUpperCase(locale));
         // Every programme has its file number.
         ((TextView) row.getChildAt(3)).setText(String.format(Locale.ROOT, "ID·%04X", a.key.hashCode() & 0xFFFF));
@@ -121,7 +123,7 @@ final class ProgrammeAdapter extends BaseAdapter {
                         ViewGroup.LayoutParams.WRAP_CONTENT));
                 ImageView icon = new ImageView(home);
                 if (!home.formation.icons) icon.setVisibility(View.GONE);
-                cell.addView(icon, new LinearLayout.LayoutParams(home.iconPx, home.iconPx));
+                cell.addView(icon, new LinearLayout.LayoutParams(register.iconPx, register.iconPx));
                 TextView caption = home.type(home.formation.labelSp, v.ink, home.formation.icons ? 60 : 40, 800);
                 caption.setLetterSpacing(home.formation.icons ? 0.04f : 0.06f);
                 // A long name takes a second line rather than losing its end.
@@ -156,11 +158,11 @@ final class ProgrammeAdapter extends BaseAdapter {
                 continue;
             }
             App a = fl.apps.get(c);
-            int n = home.shown.indexOf(a);
-            boolean first = home.querying && n == 0;
+            int n = register.shown.indexOf(a);
+            boolean first = register.querying && n == 0;
             cell.setVisibility(View.VISIBLE);
             ((TextView) cell.getChildAt(0)).setText(first ? "▶" : String.format(locale, "%02d", n + 1));
-            if (home.formation.icons) ((ImageView) cell.getChildAt(1)).setImageDrawable(home.iconFor(a));
+            if (home.formation.icons) ((ImageView) cell.getChildAt(1)).setImageDrawable(register.iconFor(a));
             TextView caption = (TextView) cell.getChildAt(2);
             caption.setText(a.label.toUpperCase(locale));
             caption.setTextColor(first ? v.accent : v.ink);
@@ -197,7 +199,7 @@ final class ProgrammeAdapter extends BaseAdapter {
             }
         }
         int members = 0;
-        for (App a : home.shown) if (a.ministry == m) members++;
+        for (App a : register.shown) if (a.ministry == m) members++;
         String title = "■ " + m.title(german) + (m == Ministry.JOY ? home.t(" (RATIONED)", " (RATIONIERT)") : "");
         ((TextView) row.getChildAt(0)).setText(title);
         ((TextView) row.getChildAt(1)).setText(String.format(locale, "%02d", members));

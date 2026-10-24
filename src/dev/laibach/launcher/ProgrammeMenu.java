@@ -50,7 +50,7 @@ final class ProgrammeMenu extends HomePart {
                 Ministry.transfer(home, a.packageName(), to);
                 Record.note(home, a.label.toUpperCase(Locale.ROOT) + " TRANSFERRED TO THE " + to.title(false) + ".",
                         a.label.toUpperCase(Locale.GERMAN) + " NEU UNTERSTELLT: " + to.title(true) + ".");
-                home.reload();
+                home.register.reload();
                 Toast.makeText(home, t(a.label + " now answers to the " + to.title(false).toLowerCase(locale),
                         a.label + " untersteht jetzt dem " + to.title(true).toLowerCase(locale)), Toast.LENGTH_SHORT).show();
                 return true;
@@ -60,7 +60,7 @@ final class ProgrammeMenu extends HomePart {
                     return false;
                 case 5:
                     Ministry.transfer(home, a.packageName(), null);
-                    home.reload();
+                    home.register.reload();
                     return true;
                 case 6: {
                     boolean on = Citizen.toggle(home, "rationed", a.key);
@@ -77,13 +77,13 @@ final class ProgrammeMenu extends HomePart {
                     Toast.makeText(home, on ? t(a.label + " is essential.", a.label + " ist unentbehrlich.")
                             : t(a.label + " is no longer essential.", a.label + " ist nicht mehr unentbehrlich."),
                             Toast.LENGTH_SHORT).show();
-                    home.applyFilter();
+                    home.register.applyFilter();
                     return true;
                 }
                 case 1:
                     // Declassifying is a return and needs no papers; redacting is a departure.
-                    if (a.hidden) home.setHidden(a, false);
-                    else ExitVisa.apply(home, a.label, a.ministry, false, () -> home.setHidden(a, true));
+                    if (a.hidden) home.register.setHidden(a, false);
+                    else ExitVisa.apply(home, a.label, a.ministry, false, () -> home.register.setHidden(a, true));
                     return true;
                 case 2:
                     home.launcherApps.startAppDetailsActivity(a.info.getComponentName(), a.info.getUser(), null, null);

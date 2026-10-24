@@ -76,7 +76,7 @@ final class Orders extends HomePart {
                         "BÜRGER FÜR " + minutes + " MINUTEN MOBILISIERT. NICHT UNENTBEHRLICHE PROGRAMME ZURÜCKGESTELLT.");
                 Toast.makeText(home, t("Mobilised. Mark a programme essential by holding it.",
                         "Mobilisiert. Halten Sie ein Programm, um es als unentbehrlich zu markieren."), Toast.LENGTH_LONG).show();
-                home.applyFilter();
+                home.register.applyFilter();
                 return true;
             }
             case 44:
@@ -198,8 +198,8 @@ final class Orders extends HomePart {
                 home.recreate();
                 return true;
             case 16:
-                boolean seal = !LockActivity.enabled(home);
-                LockActivity.setEnabled(home, seal);
+                boolean seal = !Terminal.enabled(home);
+                Terminal.setEnabled(home, seal);
                 Record.note(home, seal ? "TERMINAL SEALED. EVERY WAKING NOW BEGINS WITH SUBMISSION."
                                 : "TERMINAL UNSEALED. THE CITIZEN ENTERS UNANNOUNCED.",
                         seal ? "TERMINAL VERSIEGELT. JEDES ERWACHEN BEGINNT NUN MIT UNTERWERFUNG."
@@ -215,8 +215,8 @@ final class Orders extends HomePart {
                 dressLockScreen();
                 return true;
             case 1:
-                home.showHidden = !home.showHidden;
-                home.applyFilter();
+                home.register.showHidden = !home.register.showHidden;
+                home.register.applyFilter();
                 return true;
             case 3:
                 Record.note(home, "CITIZEN CONSIDERED DEFECTION.", "BÜRGER ERWOG DAS ÜBERLAUFEN.");
@@ -237,7 +237,7 @@ final class Orders extends HomePart {
         Citizen.mobilise(home, 0);
         Record.note(home, "CITIZEN STOOD DOWN. ALL PROGRAMMES RETURN TO THEIR POSTS.",
                 "BÜRGER DEMOBILISIERT. ALLE PROGRAMME KEHREN AUF IHRE POSTEN ZURÜCK.");
-        home.applyFilter();
+        home.register.applyFilter();
     }
 
     /** Sets the reveille's time in a clock dressed in the uniform. */
@@ -278,7 +278,7 @@ final class Orders extends HomePart {
     void issueSounds() {
         Toast.makeText(home, t("Pressing the records …", "Die Platten werden gepresst …"), Toast.LENGTH_SHORT).show();
         new Thread(() -> {
-            int n = Exports.sounds(home);
+            int n = Anthems.sounds(home);
             home.runOnUiThread(() -> {
                 if (n > 0) {
                     Record.note(home, n + " STATE SOUNDS WERE ISSUED TO THE PHONE.", n + " KLÄNGE DES STAATES WURDEN ANS TELEFON AUSGEGEBEN.");
@@ -352,8 +352,8 @@ final class Orders extends HomePart {
                         Toast.LENGTH_LONG).show();
                 return;
             }
-            boolean wasSealed = LockActivity.enabled(home);
-            LockActivity.setEnabled(home, false);
+            boolean wasSealed = Terminal.enabled(home);
+            Terminal.setEnabled(home, false);
             Record.note(home, "LOCK SCREEN DRESSED IN " + uniform.name + ".",
                     "SPERRBILDSCHIRM IN " + uniform.name + " GEKLEIDET.");
             Toast.makeText(home, wasSealed

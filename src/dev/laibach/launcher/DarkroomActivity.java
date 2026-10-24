@@ -1,6 +1,5 @@
 package dev.laibach.launcher;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -11,15 +10,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Insets;
-import android.graphics.LinearGradient;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,12 +21,9 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -170,7 +161,13 @@ public class DarkroomActivity extends StateActivity {
         // The plate on the table, its tools and the foot.
         LinearLayout desk = new LinearLayout(this);
         desk.setOrientation(LinearLayout.VERTICAL);
-        plate = new Plate();
+        plate = new Plate(this, new Plate.Host() {
+            @Override public Bitmap developed() { return developed; }
+            @Override public Censor.Marks marks() { return marks; }
+            @Override public boolean painting() { return painting; }
+            @Override public boolean busy() { return busy; }
+            @Override public void print(Canvas c) { Censor.draw(c, developed, marks, treatment, stamp(), decree(), foot()); }
+        });
         LinearLayout.LayoutParams plateLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
         plateLp.topMargin = dp(12);
         plateLp.bottomMargin = dp(8);
@@ -450,65 +447,11 @@ public class DarkroomActivity extends StateActivity {
 
     // ---- The specimen -------------------------------------------------------
 
-    /**
-     * A test picture drawn here: three citizens on a platform before a banner,
-     * with bars ready for their eyes in case the face finder does not take
-     * them for people.
-     */
+    /** The darkroom's own test picture, developed like any other. */
     private void specimen() {
         if (busy) return;
-        int w = 1600, h = 1200;
-        Bitmap b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b);
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p.setShader(new LinearGradient(0, 0, 0, h * 0.7f, 0xFF6F8FB0, 0xFFD9D2C0, Shader.TileMode.CLAMP));
-        c.drawRect(0, 0, w, h, p);
-        p.setShader(null);
-        p.setColor(0xFFF3E7C8);
-        c.drawCircle(w * 0.84f, h * 0.17f, h * 0.08f, p);
-        // The banner, and the platform.
-        p.setColor(0xFFA3202A);
-        c.drawRect(w * 0.08f, h * 0.08f, w * 0.62f, h * 0.3f, p);
-        p.setColor(0xFFE9DFC6);
-        c.drawRect(w * 0.11f, h * 0.17f, w * 0.59f, h * 0.21f, p);
-        p.setShader(new LinearGradient(0, h * 0.72f, 0, h, 0xFF4A4038, 0xFF1C1814, Shader.TileMode.CLAMP));
-        c.drawRect(0, h * 0.72f, w, h, p);
-        p.setShader(null);
         List<RectF> eyes = new ArrayList<>();
-        float[][] people = {{0.24f, 0.47f, 1f}, {0.5f, 0.42f, 1.12f}, {0.76f, 0.48f, 0.96f}};
-        int[] coats = {0xFF2B2F36, 0xFF3B3226, 0xFF27352E};
-        int[] skins = {0xFFD9B08C, 0xFFC99A74, 0xFFE2BC98};
-        for (int i = 0; i < people.length; i++) {
-            float cx = people[i][0] * w, cy = people[i][1] * h, r = h * 0.11f * people[i][2];
-            p.setColor(coats[i]);
-            c.drawRoundRect(new RectF(cx - r * 1.9f, cy + r * 1.05f, cx + r * 1.9f, h * 0.95f), r * 0.8f, r * 0.8f, p);
-            p.setColor(0xFFE9E4DA);
-            c.drawRect(cx - r * 0.35f, cy + r * 0.95f, cx + r * 0.35f, cy + r * 1.5f, p);
-            p.setShader(new RadialGradient(cx - r * 0.3f, cy - r * 0.3f, r * 1.4f, skins[i], darker(skins[i]), Shader.TileMode.CLAMP));
-            c.drawOval(new RectF(cx - r * 0.82f, cy - r, cx + r * 0.82f, cy + r * 1.05f), p);
-            p.setShader(null);
-            p.setColor(0xFF2A211B);
-            c.drawArc(new RectF(cx - r * 0.86f, cy - r * 1.08f, cx + r * 0.86f, cy + r * 0.2f), 180, 180, true, p);
-            float ey = cy + r * 0.05f, ex = r * 0.34f;
-            p.setColor(0xFFF6F2EA);
-            c.drawOval(new RectF(cx - ex - r * 0.17f, ey - r * 0.08f, cx - ex + r * 0.17f, ey + r * 0.08f), p);
-            c.drawOval(new RectF(cx + ex - r * 0.17f, ey - r * 0.08f, cx + ex + r * 0.17f, ey + r * 0.08f), p);
-            p.setColor(0xFF1E1A16);
-            c.drawCircle(cx - ex, ey, r * 0.07f, p);
-            c.drawCircle(cx + ex, ey, r * 0.07f, p);
-            c.drawRect(cx - ex - r * 0.2f, ey - r * 0.22f, cx - ex + r * 0.2f, ey - r * 0.16f, p);
-            c.drawRect(cx + ex - r * 0.2f, ey - r * 0.22f, cx + ex + r * 0.2f, ey - r * 0.16f, p);
-            p.setColor(darker(darker(skins[i])));
-            c.drawRect(cx - r * 0.06f, ey + r * 0.1f, cx + r * 0.06f, ey + r * 0.4f, p);
-            p.setColor(0xFF6E2E26);
-            c.drawRect(cx - r * 0.25f, cy + r * 0.6f, cx + r * 0.25f, cy + r * 0.66f, p);
-            eyes.add(new RectF((cx - r * 0.75f) / w, (ey - r * 0.2f) / h, (cx + r * 0.75f) / w, (ey + r * 0.2f) / h));
-        }
-        start(b, eyes);
-    }
-
-    private static int darker(int c) {
-        return 0xFF000000 | (((c >> 16) & 0xFF) * 3 / 4) << 16 | (((c >> 8) & 0xFF) * 3 / 4) << 8 | (c & 0xFF) * 3 / 4;
+        start(Specimen.draw(eyes), eyes);
     }
 
     // ---- The print ----------------------------------------------------------
@@ -651,135 +594,4 @@ public class DarkroomActivity extends StateActivity {
         prefs.edit().putInt(KEY_ISSUED, prefs.getInt(KEY_ISSUED, 0) + 1).apply();
         show();
     }
-
-    // ---- The plate ----------------------------------------------------------
-
-    /** The print as it stands, shown to fit; bars are laid and paint applied with a finger. */
-    private final class Plate extends View {
-        private final float slop = ViewConfiguration.get(DarkroomActivity.this).getScaledTouchSlop();
-        private float scale, ox, oy;
-        private float downX, downY, lastX, lastY;
-        private boolean moved;
-        private RectF dragging, drawing;
-        private Censor.Stroke stroke;
-
-        Plate() {
-            super(DarkroomActivity.this);
-        }
-
-        @Override
-        protected void onDraw(Canvas c) {
-            if (developed == null) return;
-            fit();
-            c.save();
-            c.translate(ox, oy);
-            c.scale(scale, scale);
-            Censor.draw(c, developed, marks, treatment, stamp(), decree(), foot());
-            c.restore();
-        }
-
-        private void fit() {
-            int[] size = Censor.size(developed.getWidth(), developed.getHeight());
-            scale = Math.min(getWidth() / (float) size[0], getHeight() / (float) size[1]);
-            ox = (getWidth() - size[0] * scale) / 2;
-            oy = (getHeight() - size[1] * scale) / 2;
-        }
-
-        /** Where x lies across the photograph, from 0 to 1. */
-        private float nx(float x) {
-            return ((x - ox) / scale - Censor.margin(developed.getWidth())) / developed.getWidth();
-        }
-
-        private float ny(float y) {
-            return ((y - oy) / scale - Censor.margin(developed.getWidth())) / developed.getHeight();
-        }
-
-        @Override
-        public boolean onTouchEvent(MotionEvent e) {
-            if (developed == null || busy) return false;
-            fit();
-            float x = e.getX(), y = e.getY();
-            switch (e.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    downX = lastX = x;
-                    downY = lastY = y;
-                    moved = false;
-                    dragging = drawing = null;
-                    stroke = null;
-                    if (painting) {
-                        stroke = new Censor.Stroke(0.05f);
-                        stroke.points.add(new PointF(nx(x), ny(y)));
-                        marks.all.add(stroke);
-                    } else {
-                        dragging = hit(nx(x), ny(y));
-                    }
-                    invalidate();
-                    return true;
-                case MotionEvent.ACTION_MOVE:
-                    if (Math.hypot(x - downX, y - downY) > slop) moved = true;
-                    if (stroke != null) {
-                        for (int i = 0; i < e.getHistorySize(); i++) {
-                            stroke.points.add(new PointF(nx(e.getHistoricalX(i)), ny(e.getHistoricalY(i))));
-                        }
-                        stroke.points.add(new PointF(nx(x), ny(y)));
-                    } else if (dragging != null) {
-                        dragging.offset(nx(x) - nx(lastX), ny(y) - ny(lastY));
-                    } else if (moved) {
-                        if (drawing == null) {
-                            drawing = new RectF();
-                            marks.all.add(drawing);
-                        }
-                        drawing.set(Math.min(nx(downX), nx(x)), Math.min(ny(downY), ny(y)),
-                                Math.max(nx(downX), nx(x)), Math.max(ny(downY), ny(y)));
-                    }
-                    lastX = x;
-                    lastY = y;
-                    invalidate();
-                    return true;
-                case MotionEvent.ACTION_UP:
-                    if (!painting && !moved) {
-                        if (dragging != null) {
-                            marks.all.remove(dragging);
-                        } else {
-                            // A bar the width of a pair of eyes, centred where the finger was.
-                            float bw = 0.1f, bh = 0.025f * developed.getWidth() / developed.getHeight();
-                            float cx = nx(x), cy = ny(y);
-                            if (cx >= 0 && cx <= 1 && cy >= 0 && cy <= 1) {
-                                marks.all.add(new RectF(cx - bw, cy - bh, cx + bw, cy + bh));
-                            }
-                        }
-                    } else if (drawing != null && (drawing.width() < 0.02f || drawing.height() < 0.01f)) {
-                        marks.all.remove(drawing);
-                    }
-                    dragging = drawing = null;
-                    stroke = null;
-                    invalidate();
-                    performClick();
-                    return true;
-                case MotionEvent.ACTION_CANCEL:
-                    dragging = drawing = null;
-                    stroke = null;
-                    return true;
-                default:
-                    return true;
-            }
-        }
-
-        @Override
-        public boolean performClick() {
-            return super.performClick();
-        }
-
-        /** The topmost bar under a finger at (x, y), with a little room around it. */
-        private RectF hit(float x, float y) {
-            for (int i = marks.all.size() - 1; i >= 0; i--) {
-                Object o = marks.all.get(i);
-                if (!(o instanceof RectF)) continue;
-                RectF r = (RectF) o;
-                if (x >= r.left - 0.015f && x <= r.right + 0.015f && y >= r.top - 0.015f && y <= r.bottom + 0.015f) return r;
-            }
-            return null;
-        }
-    }
-
 }
