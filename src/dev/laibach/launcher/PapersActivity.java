@@ -21,6 +21,7 @@ public class PapersActivity extends StateActivity {
     static final String EXTRA_CONSTITUTION = "constitution";
 
     LinearLayout content;
+    private boolean revealed;
     /** The identity card as drawn, for the copies that leave the launcher. */
     View card;
     @Override
@@ -88,5 +89,10 @@ public class PapersActivity extends StateActivity {
         new PapersDesk(this).fill();
         new PapersExports(this).fill();
         new PapersRecord(this).fill();
+        Motion.pressLater(content);
+        if (!revealed) {
+            revealed = true;
+            Motion.reveal(content, 80);
+        }
     }
 }

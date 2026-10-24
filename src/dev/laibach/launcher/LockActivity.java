@@ -40,7 +40,8 @@ import java.util.Date;
 public class LockActivity extends StateActivity {
     private static int slogan = (int) (System.currentTimeMillis() / 60_000) % Slogans.LOCK.length;
 
-    private TextView clock, date, power, standing, submissions, curfew, proclamation, caption;
+    private GlitchText clock;
+    private TextView date, power, standing, submissions, curfew, proclamation, caption;
     private Ticker ticker;
     private Seal seal;
     /** Whether the seal lies over the fingerprint sensor. */
@@ -406,7 +407,10 @@ public class LockActivity extends StateActivity {
     }
 
     private void fillTime() {
-        clock.setText(time("HH:mm"));
+        // The hours as the citizen keeps them, as on the home screen; the clock tears as the minute turns.
+        String now = time(android.text.format.DateFormat.is24HourFormat(this) ? "HH:mm" : "h:mm");
+        if (clock.length() > 0 && !now.contentEquals(clock.getText())) clock.jolt(240);
+        clock.setText(now);
         date.setText(new SimpleDateFormat("EEEE · d MMMM yyyy", locale).format(new Date()).toUpperCase(locale));
         if (!Citizen.curfewOn(this)) {
             curfew.setText(t("ABOLISHED", "ABGESCHAFFT"));

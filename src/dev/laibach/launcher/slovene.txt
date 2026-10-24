@@ -160,7 +160,6 @@ A new album uniform every week	Vsak teden nova albumska uniforma
 A uniform for each weekday	Uniforma za vsak dan v tednu
 Papers & permanent record	Dokumenti in stalna kartoteka
 Weekly report	Tedensko poročilo
-Mobilisation orders (tour dates)	Mobilizacijski pozivi (koncerti)
 The Constitution	Ustava
 Volkskunst (your art)	Volkskunst (vaša umetnost)
 Next approved artwork	Naslednja odobrena umetnina
@@ -488,7 +487,7 @@ ALPINE	ALPSKO
 STARK	STROGO
 Art & camera	Umetnost in kamera
 Art	Umetnost
-Duties (mobilise, roll call, drill)	Dolžnosti (mobilizacija, zbor, vaja)
+Duties	Dolžnosti
 REGULATIONS	PREDPISI
 Close	Zapri
 THE LAUNCHER'S SETTINGS	NASTAVITVE ZAGANJALNIKA
@@ -501,7 +500,7 @@ Issue sounds to the phone	Izdaj zvoke telefonu
 as ringtones, to be chosen in the phone's sound settings	kot zvonjenja, izberete jih v nastavitvah zvoka telefona
 DISPLAY	ZASLON
 Animation	Animacija
-glitches, the start-up, the turning gear	motnje, zagon, vrteče se kolo
+glitches, the start-up, the turning gear, screens coming and going	motnje, zagon, vrteče se kolo, prihajanje in odhajanje zaslonov
 LOCK SCREEN	ZAKLENJENI ZASLON
 Seal	Pečat
 the state's seal before the phone's own lock	državni pečat pred zaklepom telefona
@@ -684,7 +683,7 @@ TYPE IN A COMRADE'S NUMBER	VPIŠITE TOVARIŠEVO ŠTEVILKO
 REGISTER OF COMRADES	REGISTER TOVARIŠEV
 NO COMRADES REGISTERED. THE CITIZEN STANDS ALONE.	NOBEN TOVARIŠ NI REGISTRIRAN. DRŽAVLJAN STOJI SAM.
 Poster press	Tiskarna plakatov
-Citizen exchange (register a comrade)	Izmenjava državljanov (registriraj tovariša)
+Citizen exchange	Izmenjava državljanov
 ENTRY VISAS	VSTOPNE VIZE
 COMRADES	TOVARIŠI
 REGISTER A COMRADE	REGISTRIRAJ TOVARIŠA

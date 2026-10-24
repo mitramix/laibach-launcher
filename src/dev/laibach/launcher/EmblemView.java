@@ -26,10 +26,15 @@ final class EmblemView extends View {
         spin.setDuration(24_000);
         spin.setRepeatCount(ValueAnimator.INFINITE);
         spin.setInterpolator(new LinearInterpolator());
-        // Redraw only in half-degree steps: about 30 frames a second
-        // instead of the display's full refresh rate.
+        // The gear advances like machinery: a tooth a second, snapped into place
+        // with a little overshoot, then held. Redrawn only in half-degree steps,
+        // and not at all while it holds.
         spin.addUpdateListener(a -> {
-            float step = Math.round((float) a.getAnimatedValue() * 2) / 2f;
+            float turned = (float) a.getAnimatedValue();
+            float tooth = (float) Math.floor(turned / 15f) * 15f;
+            float p = Math.min(1f, (turned - tooth) / 15f / 0.3f);
+            float eased = 1 + 2.2f * (float) Math.pow(p - 1, 3) + 1.2f * (float) Math.pow(p - 1, 2);
+            float step = Math.round((tooth + 15f * eased) * 2) / 2f;
             if (step != angle) {
                 angle = step;
                 invalidate();

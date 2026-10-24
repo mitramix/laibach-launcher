@@ -131,10 +131,11 @@ final class StateMenu {
         else y = Math.max(top, bottom - h);
 
         popup.showAtLocation(root, Gravity.TOP | Gravity.START, x, y);
-        if (!Fx.pacified(c)) {
+        if (Fx.enabled(c)) {
             content.setAlpha(0f);
-            content.setTranslationY(-dp(c, 6));
-            content.animate().alpha(1f).translationY(0f).setDuration(140).start();
+            content.setTranslationY(-dp(c, 8));
+            content.animate().alpha(1f).translationY(0f).setDuration(220).setInterpolator(Motion.ARRIVE).start();
+            if (content.getChildAt(0) instanceof ViewGroup) Motion.reveal((ViewGroup) content.getChildAt(0), 20);
         }
     }
 

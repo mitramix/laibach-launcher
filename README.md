@@ -68,9 +68,9 @@ default.
 | | |
 |---|---|
 | **Package** | `dev.laibach.launcher` |
-| **Version** | 2.8, *The Exchange* |
-| **Source** | 106 Java files, no libraries, no Gradle |
-| **Size** | about 265 KB |
+| **Version** | 2.9, *Interference* |
+| **Source** | 107 Java files, no libraries, no Gradle |
+| **Size** | about 275 KB |
 | **Requires** | Android 12 (API 31) or later |
 
 **Statement of origin.** All artwork and text of the launcher are original
@@ -132,7 +132,7 @@ of the home screen extends `HomePart` and draws with the shared tools in
 | **Broadcast and news** | `Feed` (the channel's Atom feeds, resume and watch later), `Player` (the embedded player, kept to its own page), `Fullscreen`, `Bulletins` (concerts and news), `WallArt` (the approved art of the day), `DecreeListener` (counts notifications, never reads them) |
 | **Darkroom and art** | `Censor` (develops and redacts), `Prints` (reading, drawing, filing and sharing prints), `Plate` (the photograph on the table), `Specimen` (the drawn test subject), `DarkroomProvider`, `TextCensor`, `PosterPress`, `Wall` (the Volkskunst gallery wall) |
 | **Sound** | `Tones` (every sound, synthesised), `Anthems` (the sounds handed to the system), `Hourly` (the anthem of the hour), `Morse`, `Alarm` (reveille) |
-| **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Variant` (the uniforms), `Backdrop` (the album scenes) on `Stage` (their shared props), `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
+| **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Variant` (the uniforms), `Backdrop` (the album scenes) on `Stage` (their shared props), `Crt`, `GlitchText`, `Motion`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
 | **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Drills`, `Comrades`, `Qr`, `ExitVisa` |
 | **Copies that leave** | `Exports` (cards, pictures, sharing), `CaseFile` (the PDF case file), `Backup` (settings saved and restored) |
 | **Honours** | `Stamps` (the album), `StampArt` (glyphs, stamps and medals), `Ceremony`, `Promotion`, `Foundation` |
@@ -217,7 +217,7 @@ property of the channel.
 ### ■ Mobilisation
 
 <table>
-<tr><td align="center"><img src="docs/screenshots/mobilisation-orders.jpg" width="250" alt="Mobilisation orders (tour dates)"><br><sub>Mobilisation orders (tour dates)</sub></td><td align="center"><img src="docs/screenshots/reveille.jpg" width="250" alt="Reveille ▸ (the state's alarm)"><br><sub>Reveille ▸ (the state's alarm)</sub></td><td align="center"><img src="docs/screenshots/weekly-report.jpg" width="250" alt="Weekly report"><br><sub>Weekly report</sub></td></tr>
+<tr><td align="center"><img src="docs/screenshots/mobilisation-orders.jpg" width="250" alt="Mobilisation orders"><br><sub>Mobilisation orders</sub></td><td align="center"><img src="docs/screenshots/reveille.jpg" width="250" alt="Reveille ▸ (the state's alarm)"><br><sub>Reveille ▸ (the state's alarm)</sub></td><td align="center"><img src="docs/screenshots/weekly-report.jpg" width="250" alt="Weekly report"><br><sub>Weekly report</sub></td></tr>
 <tr><td align="center"><img src="docs/screenshots/papers-export.jpg" width="250" alt="Papers for export"><br><sub>Papers for export</sub></td></tr>
 </table>
 
@@ -730,13 +730,14 @@ the effect files beside it, `Fx.java`). No images or fonts were added.
 |---|---|
 | **Boot** | On a cold start, and after an hour's absence, LAIBACH OS 2.0 comes up as a typed terminal: mounting the citizen number, loading ideology, calibrating enthusiasm (112%), scanning for dissent (none). The screen then glitches into the terminal. Tap to skip. |
 | **Backdrop** | The uniform's scene moves behind the clock. In SPECTRE a giant cogwheel turns slowly against a dashed dial, glyphs (`LAIBACH`, `NSK`, binary, Cyrillic, `✚ ■ ▲`) fall like data rain over the upper half, and a neon grid floor advances from the horizon. |
-| **CRT glass** | Scanlines, a vignette and a refresh band rolling down every 7 s lie over everything, including the curfew, the roll call and the papers. |
-| **Glitches** | Every 4 to 13 seconds the whole state fails at once for about a fifth of a second, sometimes longer. The clock, the LAIBACH name and the large curfew and roll-call headings split into red and cyan and tear into slices. Coloured tear bars cross the screen. |
+| **CRT glass** | Scanlines, a vignette and a refresh band rolling down every 7 s lie over everything, including the curfew, the roll call and the papers. Like an old set, the glass flickers faintly now and then of its own accord. |
+| **Glitches** | The whole state fails at once, at moments no one can foresee: the quiet between failures is drawn at random (mostly 3 to 20 seconds), a third of them come as a stutter of two to four quick tears, and about one in twenty-four is a breakdown of a second or more. Each glitch picks its own kinds and strength: the split into the uniform's two neons, slices torn sideways (leaving a hole or a ghost), a shake, dropped blocks, a slipping vertical hold, snow and a flash. Every glitching text has a temper of its own, so a weak glitch passes some by and catches others late. The clock tears by itself as the minute turns. |
 | **The eye** | Beside the status in the masthead, an eye watches. It blinks every six seconds or so and has a red recording light. |
 | **Pulse** | An ECG line under the ration bar shows the citizen's heartbeat as the state assumes it: 64 BPM at standing A, plus 9 for each grade lower, plus 12 when the ration is overdrawn. |
 | **Broadcast** | A red ticker above the command line runs the state's news: `YOUR THOUGHTS ARE BACKED UP HOURLY`, `THE ALGORITHM LOVES YOU`, `DISSENT HAS BEEN DEPRECATED`, and the citizen's own number, under observation. It opens with the weather, which is controlled: `WEATHER: CONTROLLED. SUN 23° ABOVE THE HORIZON, AS PLANNED. SUNSET AT 17:58 BY DECREE`. The sun is worked out from the clock and the time zone alone, at the capital's latitude; no location is asked for. |
 | **Badges** | Every programme's icon is recoloured in two tones of the uniform, put under scanlines in a disc and set into the uniform's emblem in the accent colour, with a neon ring. Each programme receives a file number, `ID·F150`. |
-| **Emblem** | The disc glows in the second neon, pulsing four times a turn. |
+| **Emblem** | The disc glows in the second neon, pulsing four times a turn. The gear advances like machinery, a tooth a second, snapped into place and held. |
+| **Motion** | The papers and Volkskunst rise into place over the terminal and sink away when dismissed. The papers' sections, the regulations' lines and the menu's rows report one after another. Controls give a little under the finger, wide ones less than small. A new proclamation of the day slides in over the old. All of it shares one easing (`Motion.java`): fast out of the gate, a long settle. |
 
 **Menus and dialogs.** The menu, Uniforms, the programme menu, their
 submenus and every dialog (the Constitution, self-criticism, joy coupons,
@@ -792,7 +793,8 @@ picture instead. Choose its own again in Settings → Wallpaper.
 Menu → Settings → **Animation** `OFF` pacifies the display: it stops every
 effect. The backdrop and the glass remain as a still picture, and the screen
 draws nothing while idle. `ON` sets it all in motion
-again. Effects also stop by themselves in battery saver, and when Android's
+again; with it off, screens also open and close without the uniform's motion.
+Effects also stop by themselves in battery saver, and when Android's
 animations are switched off (Developer options or accessibility). They run on
 one shared 30 fps clock, and only while the terminal is visible.
 
@@ -1143,6 +1145,7 @@ The state was built in stages. Each stage was fulfilled ahead of schedule.
 | **2.7** | The Weather | Controlled weather from the sun's true position, worked out from the clock alone; a five-minute curfew warning; the dead drop; the anthem of the hour; and the typewriter at the censor's desk. |
 | **2.8** | The Exchange | The drill schedule, the passport and its entry visas, the citizen exchange by QR code, and the poster press. |
 | **2.8.1** | — | The permanent record is off until the citizen turns it on. A record kept by an earlier issue is destroyed when 2.8.1 first starts. |
+| **2.9** | Interference | The glitches are unforeseeable: random intervals, stutters and breakdowns, seven kinds and a temper for every text; the clock tears as the minute turns. Screens rise in and sink away, sections and menu rows report in order, controls give under the finger, and the gear ticks. The seal's clock keeps the citizen's 12 or 24 hours. See [Synthetic State](#synthetic-state). |
 
 <details>
 <summary><b>🔍 Findings of the inspectorate</b></summary>

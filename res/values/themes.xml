@@ -10,4 +10,16 @@
         <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <!-- The screens opened over the home screen: they rise in and sink away. -->
+    <style name="State" parent="Home">
+        <item name="android:windowAnimationStyle">@style/StateMotion</item>
+    </style>
+
+    <style name="StateMotion" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/state_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/state_hold</item>
+        <item name="android:activityCloseEnterAnimation">@anim/state_hold</item>
+        <item name="android:activityCloseExitAnimation">@anim/state_out</item>
+    </style>
 </resources>

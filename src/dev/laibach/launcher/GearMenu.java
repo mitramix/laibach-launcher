@@ -37,7 +37,7 @@ final class GearMenu extends HomePart {
         formations.setGroupCheckable(6, true, true);
         menu.add(0, 12, 0, t("Papers & permanent record", "Papiere & ständige Akte"));
         menu.add(0, 20, 0, t("Weekly report", "Wochenbericht"));
-        menu.add(0, 18, 0, t("Mobilisation orders (tour dates)", "Einberufungen (Tourdaten)"));
+        menu.add(0, 18, 0, t("Mobilisation orders", "Einberufungen"));
         menu.add(0, 13, 0, t("The Constitution", "Die Verfassung"));
         boolean camera = home.orders.cameraIssued();
         SubMenu art = menu.addSubMenu(0, 0, 0, camera ? t("Art & camera", "Kunst & Kamera") : t("Art", "Kunst"));
@@ -45,7 +45,7 @@ final class GearMenu extends HomePart {
         art.add(0, 6, 1, t("Next approved artwork", "Nächstes genehmigtes Kunstwerk"));
         art.add(0, 34, 1, t("Poster press", "Plakatpresse"));
         if (camera) art.add(0, 23, 2, t("Laibach Camera (the darkroom)", "Laibach-Kamera (die Dunkelkammer)"));
-        SubMenu duties = menu.addSubMenu(0, 0, 0, t("Duties (mobilise, roll call, drill)", "Pflichten (Mobilisierung, Appell, Übung)"));
+        SubMenu duties = menu.addSubMenu(0, 0, 0, t("Duties", "Pflichten"));
         long until = Citizen.mobilisedUntil(home);
         SubMenu mobilise = duties.addSubMenu(0, 0, 0, until > 0
                 ? t("Mobilised until ", "Mobilisiert bis ") + DateFormat.format("HH:mm", until)
@@ -57,7 +57,7 @@ final class GearMenu extends HomePart {
         duties.add(0, 14, 1, t("Report for roll call", "Zum Appell melden"));
         duties.add(0, 10, 2, t("Curfew drill", "Sperrstundenübung"));
         duties.add(0, 36, 3, t("Drill schedule", "Übungsplan"));
-        menu.add(0, 35, 0, t("Citizen exchange (register a comrade)", "Bürgeraustausch (einen Genossen registrieren)"));
+        menu.add(0, 35, 0, t("Citizen exchange", "Bürgeraustausch"));
         menu.add(0, 1, 0, home.register.showHidden ? t("Hide redacted", "Geschwärzte verbergen") : t("Show redacted", "Geschwärzte zeigen"));
         menu.add(0, 4, 0, t("Settings", "Einstellungen"));
         StateMenu.show(anchor, v, "LAIBACH LIFE™", menu, Gravity.START, item -> home.orders.act(item.getItemId()));

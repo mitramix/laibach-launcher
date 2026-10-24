@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dev.laibach.launcher"
-    android:versionCode="19"
-    android:versionName="2.8.1">
+    android:versionCode="20"
+    android:versionName="2.9.0">
 
     <uses-sdk android:minSdkVersion="31" android:targetSdkVersion="36" />
 
@@ -66,6 +66,7 @@
         <!-- The owner's own pictures, framed (long-press the emblem → Volkskunst). -->
         <activity
             android:name=".VolkskunstActivity"
+            android:theme="@style/State"
             android:exported="false"
             android:excludeFromRecents="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale" />
@@ -138,6 +139,7 @@
         <!-- The citizen's papers and permanent record (tap the papers line on the home screen). -->
         <activity
             android:name=".PapersActivity"
+            android:theme="@style/State"
             android:exported="false"
             android:excludeFromRecents="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale" />

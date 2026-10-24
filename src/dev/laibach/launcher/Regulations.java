@@ -31,7 +31,8 @@ final class Regulations extends HomePart {
      * things stand and a tap changes it; the page is drawn again after.
      */
     void show(int scrollY) {
-        close();
+        boolean fresh = scroll == null;
+        drop();
         ScrollView scroll = new ScrollView(home);
         scroll.setVerticalScrollBarEnabled(false);
         scroll.setBackgroundColor(v.bg);
@@ -77,8 +78,8 @@ final class Regulations extends HomePart {
                         "als Klingeltöne, zu wählen in den Toneinstellungen des Telefons"), "▸", true, x -> home.orders.act(25));
 
         section(page, t("DISPLAY", "ANZEIGE"));
-        toggle(page, t("Animation", "Animation"), t("glitches, the start-up, the turning gear",
-                "Störungen, der Start, das drehende Zahnrad"), !Fx.pacified(home), 15);
+        toggle(page, t("Animation", "Animation"), t("glitches, the start-up, the turning gear, screens coming and going",
+                "Störungen, der Start, das drehende Zahnrad, das Kommen und Gehen der Seiten"), !Fx.pacified(home), 15);
 
         section(page, t("LOCK SCREEN", "SPERRBILDSCHIRM"));
         toggle(page, t("Seal", "Siegel"), t("the state's seal before the phone's own lock",
@@ -172,6 +173,11 @@ final class Regulations extends HomePart {
         this.scroll = scroll;
         home.frame.addView(scroll, home.frame.indexOfChild(home.crt));
         scroll.requestApplyInsets();
+        Motion.pressLater(page);
+        if (fresh) {
+            Motion.enter(scroll);
+            Motion.reveal(page, 60);
+        }
         // Back to the same place once the page has its height; before that the scroll is clamped to the top,
         // so the place waits in the tag in case the page is drawn again first.
         if (scrollY > 0) {
@@ -198,7 +204,16 @@ final class Regulations extends HomePart {
         if (scroll != null) show(y());
     }
 
+    /** Closes the regulations, which sink away. */
     void close() {
+        if (scroll == null) return;
+        View leaving = scroll;
+        scroll = null;
+        Motion.exit(leaving, () -> home.frame.removeView(leaving));
+    }
+
+    /** Takes the page down at once, to be drawn again. */
+    private void drop() {
         if (scroll == null) return;
         home.frame.removeView(scroll);
         scroll = null;

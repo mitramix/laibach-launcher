@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
@@ -36,6 +37,11 @@ abstract class StateActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         enlist();
+        // With effects off the screens come and go without the uniform's motion.
+        if (!Fx.enabled(this) && Build.VERSION.SDK_INT >= 34) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0);
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0);
+        }
     }
 
     /** Reads the uniform and the language again. */
@@ -50,6 +56,7 @@ abstract class StateActivity extends Activity {
     void wear(View content) {
         getWindow().setBackgroundDrawable(new ColorDrawable(v.bg));
         setContentView(content);
+        Motion.pressLater(content);
         WindowInsetsController bars = getWindow().getInsetsController();
         bars.hide(WindowInsets.Type.statusBars());
         bars.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);

@@ -22,7 +22,7 @@ import java.util.Date;
  * ledger, the decree, on air and the art credit).
  */
 final class Monument extends HomePart {
-    private TextView clock;
+    private GlitchText clock;
     private TextView date;
     private TextView slogan;
     private int sloganIndex = Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % Slogans.HOME.length;
@@ -37,7 +37,7 @@ final class Monument extends HomePart {
     View build(View... parts) {
         Formation formation = home.formation;
         LinearLayout mon = column();
-        clock = glitch(formation.clockSp, v.ink, 25, 900);
+        clock = (GlitchText) glitch(formation.clockSp, v.ink, 25, 900);
         if (formation.mono) {
             clock.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD));
         } else {
@@ -75,7 +75,7 @@ final class Monument extends HomePart {
         slogan.setPadding(0, dp(10), 0, dp(14));
         slogan.setOnClickListener(view -> {
             sloganIndex = (sloganIndex + 1) % Slogans.HOME.length;
-            showSlogan();
+            Motion.retype(slogan, this::showSlogan);
         });
         showSlogan();
         mon.addView(slogan);
@@ -100,6 +100,8 @@ final class Monument extends HomePart {
                 time.setSpan(new ForegroundColorSpan(v.accent), colon, colon + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
+        // The clock tears as the minute turns.
+        if (clock.length() > 0 && !time.toString().contentEquals(clock.getText())) clock.jolt(240);
         clock.setText(time);
         int day = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
         date.setText("■ " + new SimpleDateFormat(t("EEEE, d MMMM", "EEEE, d. MMMM"), locale)

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- And sinks away when dismissed. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/fast_out_linear_in"
+    android:shareInterpolator="true">
+    <alpha android:fromAlpha="1" android:toAlpha="0" android:duration="180" />
+    <translate android:fromYDelta="0" android:toYDelta="3%" android:duration="200" />
+</set>
