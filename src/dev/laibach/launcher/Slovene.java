@@ -567,6 +567,43 @@ final class Slovene {
         SL.put("the phone's own settings", "lastne nastavitve telefona");
         SL.put("ON", "VKLOP");
         SL.put("OFF", "IZKLOP");
+        SL.put("Closed for inventory", "Zaprto zaradi inventure");
+        SL.put("The %s has spent its allowance of %s for today (%s used) and is closed for inventory until midnight. The owner may open it again; the order is noted in your record.", "%s je porabilo današnjo dodelitev %s (porabljeno %s) in je do polnoči zaprto zaradi inventure. Lastnik ga lahko znova odpre; ukaz se zabeleži v vašo kartoteko.");
+        SL.put("Reopen (noted)", "Znova odpri (zabeleženo)");
+        SL.put("WAITING ROOM", "ČAKALNICA");
+        SL.put("YOUR NUMBER IS", "VAŠA ŠTEVILKA JE");
+        SL.put("PLEASE REMAIN SEATED. YOUR PATIENCE IS RECORDED.", "PROSIMO, OSTANITE NA SEDEŽU. VAŠA POTRPEŽLJIVOST SE BELEŽI.");
+        SL.put("LEAVE THE QUEUE", "ZAPUSTI VRSTO");
+        SL.put("You have left the queue. Your place was given to another.", "Zapustili ste vrsto. Vaše mesto je dobil drug.");
+        SL.put("NOW SERVING %s", "NA VRSTI JE %s");
+        SL.put("PROCEED TO THE COUNTER", "STOPITE K OKENCU");
+        SL.put("THE INFORMANT REPORTS: MOST OF THE RATION WENT TO %s (%s).", "OVADUH POROČA: VEČINA OBROKA JE ŠLA ZA %s (%s).");
+        SL.put("THE NORM WAS FULFILLED AT %d%%. THE NEXT NORM HAS BEEN RAISED ACCORDINGLY.", "NORMA JE BILA IZPOLNJENA %d-ODSTOTNO. NASLEDNJA NORMA JE USTREZNO ZVIŠANA.");
+        SL.put("NORM FULFILMENT", "IZPOLNITEV NORME");
+        SL.put("THE COUNTER", "OKENCE");
+        SL.put("CHECK A CITIZEN NUMBER", "PREVERI DRŽAVLJANSKO ŠTEVILKO");
+        SL.put("MINISTRY QUOTAS", "KVOTE MINISTRSTEV");
+        SL.put("SUSPENDED BY THE OWNER. THEY ARE ORDERED IN THE REGULATIONS.", "LASTNIK JIH JE ODLOŽIL. ODREDIJO SE V PREDPISIH.");
+        SL.put("UNMEASURED. GRANT USAGE ACCESS AND THE MINISTRIES WILL KNOW.", "NEIZMERJENO. ODOBRITE DOSTOP DO UPORABE IN MINISTRSTVA BODO VEDELA.");
+        SL.put("CLOSED FOR INVENTORY", "ZAPRTO ZARADI INVENTURE");
+        SL.put("REOPENED", "ZNOVA ODPRTO");
+        SL.put("OPEN", "ODPRTO");
+        SL.put("Ministry quotas", "Kvote ministrstev");
+        SL.put("a ministry closes for inventory once its daily allowance is spent; needs usage access", "ministrstvo se zapre zaradi inventure, ko porabi dnevno dodelitev; potrebuje dostop do uporabe");
+        SL.put("Quotas introduced. They are measured once usage access is granted.", "Kvote uvedene. Merile se bodo, ko bo odobren dostop do uporabe.");
+        SL.put("Quotas introduced. Spend wisely.", "Kvote uvedene. Porabljajte preudarno.");
+        SL.put("Quotas lifted. The ministries thank you.", "Kvote odpravljene. Ministrstva se vam zahvaljujejo.");
+        SL.put("MINISTRY QUOTAS INTRODUCED. EVERY MINISTRY NOW KNOWS ITS LIMIT.", "UVEDENE KVOTE MINISTRSTEV. VSAKO MINISTRSTVO ZDAJ POZNA SVOJO MEJO.");
+        SL.put("MINISTRY QUOTAS LIFTED. THE MINISTRIES ARE OPEN AROUND THE CLOCK.", "KVOTE MINISTRSTEV ODPRAVLJENE. MINISTRSTVA SO ODPRTA NOČ IN DAN.");
+        SL.put("A FORGED NUMBER WAS PRESENTED AT THE COUNTER. IT HAS BEEN CONFISCATED.", "NA OKENCU JE BILA PREDLOŽENA PONAREJENA ŠTEVILKA. ZASEŽENA JE.");
+        SL.put("Type a citizen number. The check digit will tell.", "Vnesite državljansko številko. Kontrolna števka bo povedala.");
+        SL.put("%d OF 21 DIGITS", "%d OD 21 ŠTEVK");
+        SL.put("FORGED", "PONAREJENO");
+        SL.put("THIS IS YOU. YOU MAY PASS.", "TO STE VI. LAHKO NADALJUJETE.");
+        SL.put("THE CHECK DIGIT AGREES. A CITIZEN OF THE STATE.", "KONTROLNA ŠTEVKA SE UJEMA. DRŽAVLJAN DRŽAVE.");
+        SL.put("THE CHECK DIGIT DOES NOT AGREE. THE PAPERS ARE CONFISCATED.", "KONTROLNA ŠTEVKA SE NE UJEMA. DOKUMENTI SO ZASEŽENI.");
+        SL.put("Number check", "Preverjanje številke");
+        SL.put("Done", "Končano");
     }
 
     private Slovene() {}

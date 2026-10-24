@@ -51,6 +51,7 @@ final class Report {
         Locale locale = Lang.locale(german);
         List<String> out = new ArrayList<>();
         long[] days = Citizen.attentionByDay(c, 7);
+        int overdrawn = 0;
         if (days[0] < 0) {
             out.add(t(german, "ATTENTION: UNREADABLE. GRANT USAGE ACCESS AND THE STATE WILL KNOW.",
                     "AUFMERKSAMKEIT: UNLESBAR. GEWÄHREN SIE NUTZUNGSZUGRIFF, DANN WEISS ES DER STAAT."));
@@ -70,6 +71,13 @@ final class Report {
             }
             out.add(t(german, "TOTAL ", "GESAMT ") + span(total) + t(german, " · DAILY AVERAGE ", " · TAGESMITTEL ")
                     + span(total / 7));
+            Object[] most = Attention.most(c, Citizen.startOfDay() - 6 * 24 * 60 * 60_000L);
+            if (most != null) {
+                out.add(String.format(locale, t(german, "THE INFORMANT REPORTS: MOST OF THE RATION WENT TO %s (%s).",
+                                "DER INFORMANT MELDET: DER GRÖSSTE TEIL DER ZUTEILUNG GING AN %s (%s)."),
+                        Attention.label(c, (String) most[0]).toUpperCase(locale), span((long) most[1])));
+            }
+            overdrawn = over;
             out.add("");
             out.add(over == 0
                     ? t(german, "THE RATION WAS RESPECTED ON EVERY DAY. THIS IS NOTED WITH SATISFACTION.",
@@ -77,6 +85,8 @@ final class Report {
                     : String.format(locale, t(german, "THE RATION WAS OVERDRAWN ON %d DAY(S). THIS IS NOTED.",
                             "DIE ZUTEILUNG WURDE AN %d TAG(EN) ÜBERZOGEN. DIES WIRD VERMERKT."), over));
         }
+        out.add(String.format(locale, t(german, "THE NORM WAS FULFILLED AT %d%%. THE NEXT NORM HAS BEEN RAISED ACCORDINGLY.",
+                "DIE NORM WURDE ZU %d%% ERFÜLLT. DIE NÄCHSTE NORM WURDE ENTSPRECHEND ERHÖHT."), Norm.week(c, overdrawn)));
         int unlocks = Citizen.unlocks(c, 7);
         out.add(t(german, "UNLOCKS THIS WEEK: ", "ENTSPERRUNGEN DIESE WOCHE: ")
                 + (unlocks < 0 ? t(german, "UNREADABLE", "UNLESBAR") : String.valueOf(unlocks)));

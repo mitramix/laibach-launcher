@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * The citizen's papers: identity card, the day's statistics, the article of the
@@ -127,11 +128,13 @@ public class PapersActivity extends StateActivity {
                 t("JOY COUPONS", "FREUDENMARKEN"), Citizen.joyLeft(this) + " / " + Citizen.JOY_COUPONS);
         figures(t("SELF-CRITICISMS", "SELBSTKRITIKEN"), String.valueOf(Citizen.confessions(this)),
                 t("RECORD ENTRIES", "AKTENEINTRÄGE"), String.valueOf(Record.entries(this).size()));
-        // Harmony is always nearly perfect; the plan is always exceeded.
-        int seed = (int) Math.floorMod((year * 1000L + day) * 2654435761L, 1000L);
+        // Harmony is always nearly perfect; the norm is always exceeded.
+        int seed = Norm.seed(year * 1000L + day);
         figures(t("COLLECTIVE HARMONY", "KOLLEKTIVE HARMONIE"),
                 String.format(locale, "99.%02d%%", seed % 100).replace('.', german ? ',' : '.'),
-                t("PLAN FULFILMENT", "PLANERFÜLLUNG"), (100 + seed % 13) + "%");
+                t("NORM FULFILMENT", "NORMERFÜLLUNG"), Norm.today(this) + "%");
+
+        quotas();
 
         // The article of the day; tap for the whole constitution.
         heading(t("ARTICLE OF THE DAY", "ARTIKEL DES TAGES"));
@@ -160,6 +163,11 @@ public class PapersActivity extends StateActivity {
         why.setPadding(0, 0, 0, dp(10));
         content.addView(why);
         content.addView(button(t("SUBMIT SELF-CRITICISM", "SELBSTKRITIK EINREICHEN"), view -> confess()),
+                fullWidth());
+
+        // The counter checks anyone's papers.
+        heading(t("THE COUNTER", "DER SCHALTER"));
+        content.addView(button(t("CHECK A CITIZEN NUMBER", "BÜRGERNUMMER PRÜFEN"), view -> NumberCheck.show(this, v)),
                 fullWidth());
 
         // Papers that leave the launcher.
@@ -283,6 +291,42 @@ public class PapersActivity extends StateActivity {
         foot.setPadding(0, dp(8), 0, 0);
         card.addView(foot);
         return card;
+    }
+
+    /** Each ministry's allowance for the day, and which are closed for inventory. */
+    private void quotas() {
+        heading(t("MINISTRY QUOTAS", "KONTINGENTE DER MINISTERIEN"));
+        if (!Quotas.on(this) || !Citizen.usageAccess(this)) {
+            TextView off = type(11, v.muted, 80, 650);
+            off.setText(!Quotas.on(this)
+                    ? t("SUSPENDED BY THE OWNER. THEY ARE ORDERED IN THE REGULATIONS.",
+                            "VOM BESITZER AUSGESETZT. SIE WERDEN IN DEN VORSCHRIFTEN ANGEORDNET.")
+                    : t("UNMEASURED. GRANT USAGE ACCESS AND THE MINISTRIES WILL KNOW.",
+                            "UNGEMESSEN. GEWÄHREN SIE NUTZUNGSZUGRIFF, DANN WISSEN ES DIE MINISTERIEN."));
+            off.setLetterSpacing(0.1f);
+            content.addView(off);
+            return;
+        }
+        Map<Ministry, Long> spent = Quotas.spent(this);
+        for (Ministry m : Ministry.values()) {
+            long allowance = Quotas.allowance(m);
+            if (allowance == 0) continue;
+            boolean closed = Quotas.closed(this, m, spent);
+            LinearLayout r = row();
+            r.setPadding(0, dp(6), 0, dp(6));
+            TextView name = type(12, v.ink, 70, 800);
+            name.setText(m.title(german));
+            name.setLetterSpacing(0.06f);
+            r.addView(name, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            TextView state = type(12, closed ? v.accent : v.muted, 70, 850);
+            state.setText(span(spent.getOrDefault(m, 0L)) + " / " + span(allowance) + "  "
+                    + (closed ? t("CLOSED FOR INVENTORY", "WEGEN INVENTUR GESCHLOSSEN")
+                    : Quotas.reopened(this, m) ? t("REOPENED", "WIEDER GEÖFFNET") : t("OPEN", "GEÖFFNET")));
+            state.setLetterSpacing(0.08f);
+            r.addView(state);
+            content.addView(r);
+            content.addView(rule(v.rule), ruleParams(Math.max(1, dp(1)), 0, 0));
+        }
     }
 
     private View field(String label, String value) {

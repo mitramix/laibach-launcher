@@ -144,6 +144,8 @@ public class HomeActivity extends StateActivity {
     boolean showHidden;
     /** The regulations: the launcher's settings, over the home screen while they are open. */
     Regulations regulations;
+    /** The queue in front of a rationed programme, over the home screen while someone waits. */
+    WaitingRoom waitingRoom;
     /** What the menus offer and what their orders do; made with the rest of the screen. */
     GearMenu gearMenu;
     ProgrammeMenu programmeMenu;
@@ -321,6 +323,7 @@ public class HomeActivity extends StateActivity {
         unregisterReceiver(batteryChanged);
         unregisterReceiver(timeChanged);
         visible = false;
+        waitingRoom.leave();
         awaySince = getSystemService(PowerManager.class).isInteractive() ? System.currentTimeMillis() : 0;
         reset();
     }
@@ -330,6 +333,7 @@ public class HomeActivity extends StateActivity {
         super.onNewIntent(intent);
         // Home pressed while already home.
         regulations.close();
+        waitingRoom.leave();
         reset();
     }
 
@@ -387,6 +391,7 @@ public class HomeActivity extends StateActivity {
         curfew = new Curfew(this);
         frame.addView(curfew.build());
         regulations = new Regulations(this);
+        waitingRoom = new WaitingRoom(this);
         // The glass of the screen lies over everything, the boot over even that.
         crt = new Crt(this, v);
         frame.addView(crt);
@@ -689,7 +694,8 @@ public class HomeActivity extends StateActivity {
 
     /** Back during the roll call is an answer too; otherwise it clears the search. */
     void back() {
-        if (regulations.open()) regulations.close();
+        if (waitingRoom.open()) waitingRoom.leave();
+        else if (regulations.open()) regulations.close();
         else if (rollCall.showing()) rollCall.answer(false); else reset();
     }
 

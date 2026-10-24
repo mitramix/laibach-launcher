@@ -125,10 +125,10 @@ of the home screen extends `HomePart` and draws with the shared tools in
 |---|---|
 | **Screens** | `StateActivity` (shared uniform and type), `HomeActivity`, `PapersActivity`, `LockActivity`, `CensorActivity`, `DarkroomActivity`, `VolkskunstActivity`, `BroadcastActivity`, `AlarmActivity` |
 | **Home screen parts** | `HomePart` (base), `Ledger` (number, standing, ration, life force), `Decrees`, `OnAir`, `ArtCredit`, `News` (the ticker's text), `Curfew`, `RollCall`, `Regulations` |
-| **Programmes** | `App`, `ProgrammeAdapter` (rows, grids, ministry headers), `Counter` (opening a programme past the ration and the coupons), `ProgrammeMenu`, `Ministry`, `Formation` |
+| **Programmes** | `App`, `ProgrammeAdapter` (rows, grids, ministry headers), `Counter` (opening a programme past the quotas, the ration, the queue and the coupons), `WaitingRoom`, `ProgrammeMenu`, `Ministry`, `Quotas`, `Formation` |
 | **Menus and orders** | `GearMenu`, `Orders`, `CallUps`, `PowerRation`, `StateMenu` |
 | **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Backdrop`, `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
-| **The citizen** | `Citizen`, `Record`, `Report`, `Constitution`, `Exports` |
+| **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Exports` |
 | **Language** | `Lang`, `Slovene` (every English string has its Slovenian) |
 
 ### ■ Installation over adb
@@ -428,6 +428,10 @@ in English and German.
   from the time the terminal spends out of sight while the screen is on, and
   the note says `(ESTIMATED)`. Past the ration, the ration reads `OVERDRAWN`.
   With usage access the note then adds `(REPORTED)`.
+- **The norm.** Every day has a norm, and the norm is always fulfilled: 101%
+  and up, a little more for a better grade. The weekly report states the
+  week's fulfilment and announces that the next norm has been raised
+  accordingly. The figures are invented. They are also binding.
 
 ### ■ Standing
 
@@ -468,6 +472,31 @@ offers **Return to its own ministry**. Transfers are filed in the preferences
 file `ministries`. Search shows a plain list, without ministry headers. The
 keywords are kept in `Ministry.java`.
 
+### ■ Ministry quotas
+
+**Menu → Settings → Regulations → Ministry quotas** (off by default) gives
+each ministry a daily allowance: Communication and Enlightenment 60 minutes,
+Joy 45, Movement 30, Prosperity 20. Labour and Administration have none and
+never close. Once a ministry's allowance is spent, its programmes are `CLOSED
+FOR INVENTORY` until midnight. The citizen may **Comply**, or **Reopen
+(noted)**, which opens that ministry again for the rest of the day and writes
+it on the record. Quotas need usage access. Without it they are not
+measured, and nothing closes. The papers list each ministry's spending.
+
+### ■ The waiting room
+
+A rationed programme (the Ministry of Joy) is not opened at once. The
+citizen draws a number, `YOUR NUMBER IS 0047`, and waits about three seconds
+while the counter calls `NOW SERVING 0044`, `0045`, `0046`. Then `PROCEED TO
+THE COUNTER` and the programme opens. Numbers rise through the day and start
+again each morning. **Back** or **Leave the queue** abandons the place.
+
+### ■ The informant
+
+With usage access, the weekly report names the programme that took most of
+the week's ration: `THE INFORMANT REPORTS: MOST OF THE RATION WENT TO …`.
+The informant reports only to the citizen. Nothing leaves the phone.
+
 ### ■ Curfew
 
 - From 23:00 to 06:00 the terminal is covered by `REST IS COMPULSORY`, with
@@ -502,8 +531,14 @@ Tap the papers row on the terminal (citizen number and standing), or go to
   BEARER.`
 - **Statistics of the day.** Attendance, attention used, exemptions, joy
   coupons, self-criticisms and record entries. COLLECTIVE HARMONY always
-  stands at 99.something percent. PLAN FULFILMENT always exceeds 100%. Both
+  stands at 99.something percent. NORM FULFILMENT always exceeds 100%. Both
   change daily. Both are invented.
+- **Ministry quotas**: what each ministry has spent today against its
+  allowance (see [Ministry quotas](#-ministry-quotas)).
+- **The counter.** **Check a citizen number** takes any 21-digit number and
+  checks its Damm digit: `VALID` or `FORGED`. One mistyped digit, or two
+  neighbours swapped, is always caught. The citizen's own number is
+  recognised: `THIS IS YOU. YOU MAY PASS.` Forgeries are noted on the record.
 - **Article of the day** from the Constitution.
 - **Self-criticism and the permanent record**, described below.
 
@@ -898,6 +933,9 @@ The state notes everything the citizen does *in the launcher*. It does not
 look further.
 
 > [!NOTE]
+> - **Usage.** The ration, the quotas and the informant read Android's own
+>   usage events on the phone. Which programme was used, and for how long, is
+>   added up there and never sent anywhere.
 > - **Notifications.** Decrees read only which programme posted a
 >   notification and how many are waiting. Never the title. Never the text.
 > - **Photos.** The system photo picker shows the launcher only the pictures
@@ -931,6 +969,7 @@ The state was built in stages. Each stage was fulfilled ahead of schedule.
 | **2.4** | The Darkroom | Laibach Camera and its darkroom, the state's sounds issued to the phone as ringtones, ten formations, and the **Regulations**: the launcher's own settings, with sounds on or off. The gear menu is regrouped into Art & camera and Duties. |
 | **2.4.1** | — | The censor's desk: text shared to the launcher comes back blacked out, as a decree or as a typed memo. |
 | **2.4.2** | — | Every citizen is renumbered: the full 64-bit Android ID as 20 digits and a Damm check digit. No two phones share a number. |
+| **2.5** | The Plan | The daily norm, ministry quotas and inventory, the waiting room, the informant in the weekly report, and the number check at the counter. The terminal is rebuilt from separate organs. |
 
 <details>
 <summary><b>🔍 Findings of the inspectorate</b></summary>

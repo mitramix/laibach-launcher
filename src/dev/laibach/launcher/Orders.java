@@ -151,6 +151,20 @@ final class Orders extends HomePart {
                         Toast.LENGTH_LONG).show();
                 home.curfew.update();
                 return true;
+            case 27: {
+                boolean on = !Quotas.on(home);
+                Quotas.setOn(home, on);
+                Record.note(home, on ? "MINISTRY QUOTAS INTRODUCED. EVERY MINISTRY NOW KNOWS ITS LIMIT."
+                                : "MINISTRY QUOTAS LIFTED. THE MINISTRIES ARE OPEN AROUND THE CLOCK.",
+                        on ? "KONTINGENTE DER MINISTERIEN EINGEFÜHRT. JEDES MINISTERIUM KENNT NUN SEINE GRENZE."
+                                : "KONTINGENTE DER MINISTERIEN AUFGEHOBEN. DIE MINISTERIEN SIND RUND UM DIE UHR GEÖFFNET.");
+                toast(on && !Citizen.usageAccess(home)
+                        ? t("Quotas introduced. They are measured once usage access is granted.",
+                                "Kontingente eingeführt. Gemessen wird, sobald Nutzungszugriff erteilt ist.")
+                        : on ? t("Quotas introduced. Spend wisely.", "Kontingente eingeführt. Haushalten Sie gut.")
+                        : t("Quotas lifted. The ministries thank you.", "Kontingente aufgehoben. Die Ministerien danken Ihnen."));
+                return true;
+            }
             case 15:
                 boolean calm = !Fx.pacified(home);
                 Fx.setPacified(home, calm);

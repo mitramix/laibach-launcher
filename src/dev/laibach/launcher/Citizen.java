@@ -39,7 +39,7 @@ final class Citizen {
         return now.get(Calendar.YEAR) + "-" + now.get(Calendar.DAY_OF_YEAR);
     }
 
-    private static long startOfDay() {
+    static long startOfDay() {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
@@ -88,7 +88,7 @@ final class Citizen {
     }
 
     /** The Damm check digit of a string of digits. */
-    private static int damm(String digits) {
+    static int damm(String digits) {
         int interim = 0;
         for (int i = 0; i < digits.length(); i++) interim = DAMM[interim][digits.charAt(i) - '0'];
         return interim;
@@ -113,43 +113,7 @@ final class Citizen {
 
     /** Foreground time of every other app between from and now, from the usage events; -1 if unreadable. */
     private static long measured(Context c, long from, long now) {
-        UsageStatsManager usm = c.getSystemService(UsageStatsManager.class);
-        UsageEvents events;
-        try {
-            events = usm.queryEvents(from, now);
-        } catch (SecurityException e) {
-            return -1;
-        }
-        if (events == null) return -1;
-        String own = c.getPackageName();
-        String current = null;
-        long since = 0, total = 0;
-        UsageEvents.Event e = new UsageEvents.Event();
-        while (events.getNextEvent(e)) {
-            switch (e.getEventType()) {
-                case UsageEvents.Event.ACTIVITY_RESUMED:
-                    if (current != null && !current.equals(own)) total += e.getTimeStamp() - since;
-                    current = e.getPackageName();
-                    since = e.getTimeStamp();
-                    break;
-                case UsageEvents.Event.ACTIVITY_PAUSED:
-                case UsageEvents.Event.ACTIVITY_STOPPED:
-                    if (current != null && current.equals(e.getPackageName())) {
-                        if (!current.equals(own)) total += e.getTimeStamp() - since;
-                        current = null;
-                    }
-                    break;
-                case UsageEvents.Event.SCREEN_NON_INTERACTIVE:
-                case UsageEvents.Event.DEVICE_SHUTDOWN:
-                    if (current != null && !current.equals(own)) total += e.getTimeStamp() - since;
-                    current = null;
-                    break;
-                default:
-                    break;
-            }
-        }
-        if (current != null && !current.equals(own)) total += now - since;
-        return total;
+        return Attention.measure(c, from, now, null);
     }
 
     /**

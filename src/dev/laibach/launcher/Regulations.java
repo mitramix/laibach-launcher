@@ -83,6 +83,10 @@ final class Regulations extends HomePart {
 
         section(page, t("ROUTINES", "TAGESORDNUNG"));
         toggle(page, t("Curfew", "Sperrstunde"), "23:00–06:00", Citizen.curfewOn(home), 11);
+        toggle(page, t("Ministry quotas", "Kontingente der Ministerien"),
+                t("a ministry closes for inventory once its daily allowance is spent; needs usage access",
+                        "ein Ministerium schließt wegen Inventur, wenn seine Tageszuteilung verbraucht ist; braucht Nutzungszugriff"),
+                Quotas.on(home), 27);
         int alarm = Alarm.minutes(home);
         line(page, t("Reveille", "Weckruf"), t("the state's alarm; tap to set the time",
                         "der Wecker des Staates; tippen, um die Zeit festzulegen"),
