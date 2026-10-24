@@ -2,22 +2,15 @@ package dev.laibach.launcher;
 
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
-import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Insets;
-import android.graphics.Matrix;
-import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -30,10 +23,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,7 +48,6 @@ public class DarkroomActivity extends StateActivity {
     private static final String CAPTURE_FILE = "capture.jpg";
     private static final String KEY_ISSUED = "darkroomIssued";
 
-    /** The uniform the room is dressed in. */
     /** The uniform the print is developed in. */
     private Variant treatment;
     private SharedPreferences prefs;
@@ -318,7 +306,7 @@ public class DarkroomActivity extends StateActivity {
         busy = true;
         show();
         new Thread(() -> {
-            Bitmap picture = upright(uri);
+            Bitmap picture = Prints.upright(this, uri, MAX_SIDE);
             if (capture) new File(DarkroomProvider.dir(this), CAPTURE_FILE).delete();
             runOnUiThread(() -> {
                 busy = false;
@@ -330,47 +318,6 @@ public class DarkroomActivity extends StateActivity {
                 }
             });
         }, "darkroom-read").start();
-    }
-
-    private Bitmap upright(Uri uri) {
-        try {
-            BitmapFactory.Options bounds = new BitmapFactory.Options();
-            bounds.inJustDecodeBounds = true;
-            try (InputStream in = getContentResolver().openInputStream(uri)) {
-                BitmapFactory.decodeStream(in, null, bounds);
-            }
-            if (bounds.outWidth <= 0) return null;
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inSampleSize = 1;
-            while (Math.max(bounds.outWidth, bounds.outHeight) / (opts.inSampleSize * 2) >= MAX_SIDE) {
-                opts.inSampleSize *= 2;
-            }
-            Bitmap raw;
-            try (InputStream in = getContentResolver().openInputStream(uri)) {
-                raw = BitmapFactory.decodeStream(in, null, opts);
-            }
-            if (raw == null) return null;
-            int rotation = 0;
-            try (InputStream in = getContentResolver().openInputStream(uri)) {
-                int o = new ExifInterface(in).getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                        ExifInterface.ORIENTATION_NORMAL);
-                rotation = o == ExifInterface.ORIENTATION_ROTATE_90 ? 90
-                        : o == ExifInterface.ORIENTATION_ROTATE_180 ? 180
-                        : o == ExifInterface.ORIENTATION_ROTATE_270 ? 270 : 0;
-            } catch (IOException | RuntimeException e) {
-                // No usable EXIF: keep it as decoded.
-            }
-            float scale = Math.min(1f, (float) MAX_SIDE / Math.max(raw.getWidth(), raw.getHeight()));
-            if (scale == 1f && rotation == 0) return raw.copy(Bitmap.Config.ARGB_8888, false);
-            Matrix m = new Matrix();
-            m.postScale(scale, scale);
-            m.postRotate(rotation);
-            Bitmap upright = Bitmap.createBitmap(raw, 0, 0, raw.getWidth(), raw.getHeight(), m, true);
-            raw.recycle();
-            return upright;
-        } catch (IOException | RuntimeException | OutOfMemoryError e) {
-            return null;
-        }
     }
 
     /** Puts a picture on the table, finds the faces and develops it. */
@@ -477,14 +424,6 @@ public class DarkroomActivity extends StateActivity {
                 + t("COORDINATES REMOVED", "KOORDINATEN ENTFERNT");
     }
 
-    /** The print at full size: a picture of its own, without the photograph's metadata. */
-    private Bitmap print(Bitmap developedNow, Censor.Marks marksNow, Variant v, String stamp, String decree, String foot) {
-        int[] size = Censor.size(developedNow.getWidth(), developedNow.getHeight());
-        Bitmap out = Bitmap.createBitmap(size[0], size[1], Bitmap.Config.ARGB_8888);
-        Censor.draw(new Canvas(out), developedNow, marksNow, v, stamp, decree, foot);
-        return out;
-    }
-
     private interface Done {
         void with(Bitmap print);
     }
@@ -495,13 +434,13 @@ public class DarkroomActivity extends StateActivity {
         busy = true;
         show();
         Bitmap d = developed;
-        Censor.Marks m = copy(marks);
+        Censor.Marks m = marks.copy();
         Variant v = treatment;
         String stamp = stamp(), decree = decree(), foot = foot();
         new Thread(() -> {
             Bitmap print;
             try {
-                print = print(d, m, v, stamp, decree, foot);
+                print = Prints.print(d, m, v, stamp, decree, foot);
             } catch (OutOfMemoryError e) {
                 print = null;
             }
@@ -518,32 +457,11 @@ public class DarkroomActivity extends StateActivity {
         }, "darkroom-print").start();
     }
 
-    private static Censor.Marks copy(Censor.Marks from) {
-        Censor.Marks to = new Censor.Marks();
-        for (Object o : from.all) {
-            if (o instanceof RectF) {
-                to.all.add(new RectF((RectF) o));
-            } else {
-                Censor.Stroke s = (Censor.Stroke) o, c = new Censor.Stroke(s.width);
-                for (PointF pt : s.points) c.points.add(new PointF(pt.x, pt.y));
-                to.all.add(c);
-            }
-        }
-        return to;
-    }
-
     /** Files the print in Pictures/Laibach and notes it in the record. */
     private void file() {
         int barCount = marks.bars().size(), painted = marks.all.size() - barCount;
         printThen(print -> new Thread(() -> {
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, "laibach-censored-"
-                    + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date()) + ".jpg");
-            values.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + Exports.FOLDER);
-            boolean ok = Exports.write(this, MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
-                    values, out -> print.compress(Bitmap.CompressFormat.JPEG, 90, out));
-            print.recycle();
+            boolean ok = Prints.file(this, print);
             runOnUiThread(() -> {
                 if (!ok) {
                     Toast.makeText(this, t("THE PRINT COULD NOT BE FILED.", "DER ABZUG LIESS SICH NICHT ABLEGEN."), Toast.LENGTH_SHORT).show();
@@ -562,30 +480,14 @@ public class DarkroomActivity extends StateActivity {
     /** Shares the print through the share menu, from a copy in the darkroom's cache. */
     private void share() {
         printThen(print -> new Thread(() -> {
-            String name = "print-" + System.currentTimeMillis() + ".jpg";
-            boolean ok;
-            try (OutputStream out = new FileOutputStream(new File(DarkroomProvider.dir(this), name))) {
-                ok = print.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            } catch (IOException e) {
-                ok = false;
-            }
-            print.recycle();
-            boolean written = ok;
+            String name = Prints.cache(this, print);
             runOnUiThread(() -> {
-                if (!written) {
+                if (name == null) {
                     Toast.makeText(this, t("THE PRINT COULD NOT BE MADE.", "DER ABZUG LIESS SICH NICHT HERSTELLEN."), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 issued();
-                Uri uri = DarkroomProvider.uri(name);
-                Intent send = new Intent(Intent.ACTION_SEND);
-                send.setType("image/jpeg");
-                send.putExtra(Intent.EXTRA_STREAM, uri);
-                send.setClipData(ClipData.newRawUri("", uri));
-                send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                Intent chooser = Intent.createChooser(send, t("ISSUE THE PRINT", "DEN ABZUG HERAUSGEBEN"));
-                chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, new ComponentName[]{new ComponentName(this, DarkroomActivity.class)});
-                startActivity(chooser);
+                startActivity(Prints.issue(this, name, t("ISSUE THE PRINT", "DEN ABZUG HERAUSGEBEN")));
             });
         }, "darkroom-share").start());
     }

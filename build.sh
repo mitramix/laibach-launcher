@@ -30,6 +30,8 @@ javac -source 17 -target 17 -Xlint:-options -Xlint:deprecation -encoding UTF-8 \
   -classpath "$JAR" -d "$OUT/classes" $(find src -name '*.java')
 "$BT/d8" --release --min-api 31 --lib "$JAR" --output "$OUT/dex" $(find "$OUT/classes" -name '*.class')
 (cd "$OUT/dex" && zip -q ../unsigned.apk classes.dex)
+# Tables kept beside their classes (the Slovenian texts) travel as they are.
+(cd src && zip -q "../$OUT/unsigned.apk" $(find . -name '*.txt' | sed 's|^\./||'))
 
 "$BT/zipalign" -f -p 4 "$OUT/unsigned.apk" "$OUT/aligned.apk"
 "$BT/apksigner" sign --ks keystore/laibach.jks --ks-pass file:keystore/password.txt \

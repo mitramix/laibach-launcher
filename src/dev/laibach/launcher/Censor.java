@@ -49,6 +49,21 @@ final class Censor {
         boolean empty() {
             return all.isEmpty();
         }
+
+        /** A copy that later marks on the table leave alone. */
+        Marks copy() {
+            Marks to = new Marks();
+            for (Object o : all) {
+                if (o instanceof RectF) {
+                    to.all.add(new RectF((RectF) o));
+                } else {
+                    Stroke s = (Stroke) o, c = new Stroke(s.width);
+                    for (PointF pt : s.points) c.points.add(new PointF(pt.x, pt.y));
+                    to.all.add(c);
+                }
+            }
+            return to;
+        }
     }
 
     // ---- Treatments ---------------------------------------------------------

@@ -2,7 +2,6 @@ package dev.laibach.launcher;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ColorMatrix;
@@ -18,12 +17,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -31,8 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.window.OnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
 
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
@@ -55,7 +47,6 @@ import java.util.concurrent.Executors;
  */
 public class BroadcastActivity extends StateActivity {
     private static final String FEEDS = "https://www.youtube.com/feeds/videos.xml?";
-    /** The page the player is served from, so that YouTube sees where it is embedded. */
     private static final String ORIGIN = "https://dev.laibach.launcher";
     private static final long FRESH = 30 * 60_000L;
 
@@ -90,11 +81,9 @@ public class BroadcastActivity extends StateActivity {
     private FrameLayout glass, screen;
     private LinearLayout chips, list;
     private TextView standby, caption, meta, signal;
-    private WebView player;
+    private Player player;
     private Feed.Video playing;
-    private View fullscreen;
-    private WebChromeClient.CustomViewCallback leaveFullscreen;
-    private final OnBackInvokedCallback backFromFullscreen = this::closeFullscreen;
+    private Fullscreen fullscreen;
     private final ColorMatrixColorFilter grey;
 
     {
@@ -112,6 +101,7 @@ public class BroadcastActivity extends StateActivity {
         glass.addView(buildUi());
         glass.addView(new Crt(this, v));
         wear(glass);
+        fullscreen = new Fullscreen(this, glass);
         tune(programme);
         playFrom(getIntent());
     }
@@ -418,7 +408,32 @@ public class BroadcastActivity extends StateActivity {
         if (player == null) player = newPlayer();
         standby.setVisibility(View.GONE);
         player.setVisibility(View.VISIBLE);
-        player.loadDataWithBaseURL(ORIGIN + "/", page(video.id, Feed.position(this, video.id)), "text/html", "utf-8", null);
+        player.tune(video.id, Feed.position(this, video.id));
+    }
+
+    private Player newPlayer() {
+        Player web = new Player(this, new Player.Host() {
+            @Override public Feed.Video playing() { return playing; }
+            @Override public void refused(int code) { BroadcastActivity.this.refused(code); }
+
+            @Override
+            public void ended() {
+                switchOff();
+                standby(t("TRANSMISSION ENDED.\nREMAIN TUNED.", "SENDUNG BEENDET.\nBLEIBEN SIE EMPFANGSBEREIT."));
+            }
+
+            @Override
+            public void forbidden() {
+                Toast.makeText(BroadcastActivity.this, t("THE WIDER YOUTUBE IS NOT PERMITTED.",
+                        "DAS WEITERE YOUTUBE IST NICHT GESTATTET."), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override public void fullscreen(View view, WebChromeClient.CustomViewCallback callback) { fullscreen.open(view, callback); }
+            @Override public void windowed() { fullscreen.close(); }
+        });
+        screen.addView(web, 0, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        return web;
     }
 
     /** Redraws a video's row after it starts or stops playing. */
@@ -430,100 +445,6 @@ public class BroadcastActivity extends StateActivity {
             list.removeViewAt(i);
             list.addView(item(video), i);
             return;
-        }
-    }
-
-    private WebView newPlayer() {
-        WebView web = new WebView(this);
-        web.setBackgroundColor(0xFF000000);
-        WebSettings s = web.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setMediaPlaybackRequiresUserGesture(false);
-        s.setSupportMultipleWindows(false);
-        s.setJavaScriptCanOpenWindowsAutomatically(false);
-        s.setAllowFileAccess(false);
-        s.setAllowContentAccess(false);
-        web.addJavascriptInterface(new Receiver(), "TV");
-        web.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                if (permitted(request)) return false;
-                // The logo, the title, "watch on YouTube", the end screen: all lead out. None may.
-                Toast.makeText(BroadcastActivity.this, t("THE WIDER YOUTUBE IS NOT PERMITTED.",
-                        "DAS WEITERE YOUTUBE IST NICHT GESTATTET."), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-        web.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onShowCustomView(View view, CustomViewCallback callback) {
-                openFullscreen(view, callback);
-            }
-
-            @Override
-            public void onHideCustomView() {
-                closeFullscreen();
-            }
-        });
-        screen.addView(web, 0, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        return web;
-    }
-
-    /** Only the player itself may load; everything else is the wider YouTube. */
-    private static boolean permitted(WebResourceRequest request) {
-        Uri u = request.getUrl();
-        String host = u.getHost() == null ? "" : u.getHost();
-        String path = u.getPath() == null ? "" : u.getPath();
-        if (request.isForMainFrame()) return u.toString().startsWith(ORIGIN) || "about".equals(u.getScheme());
-        return (host.equals("www.youtube-nocookie.com") || host.equals("www.youtube.com")) && path.startsWith("/embed/");
-    }
-
-    /** The player page: the IFrame API, no related videos, no annotations, reports back to Receiver. */
-    private static String page(String id, int start) {
-        return "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-                + "<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}#p{width:100%;height:100%}</style>"
-                + "</head><body><div id=\"p\"></div>"
-                + "<script>"
-                + "var player;"
-                + "function onYouTubeIframeAPIReady(){player=new YT.Player('p',{host:'https://www.youtube-nocookie.com',"
-                + "videoId:'" + id + "',playerVars:{rel:0,playsinline:1,iv_load_policy:3,autoplay:1,fs:1,start:" + start + ","
-                + "origin:'" + ORIGIN + "'},events:{"
-                + "onError:function(e){TV.error(e.data)},"
-                + "onStateChange:function(e){TV.state(e.data)}}});"
-                // Where the citizen is, every five seconds, so the broadcast resumes there.
-                + "setInterval(function(){if(player&&player.getCurrentTime&&player.getPlayerState()==1)"
-                + "TV.at(player.getCurrentTime(),player.getDuration())},5000);}"
-                + "</script><script src=\"https://www.youtube.com/iframe_api\"></script>"
-                + "</body></html>";
-    }
-
-    /** The player's reports; they arrive on a background thread. */
-    private final class Receiver {
-        @JavascriptInterface
-        public void error(int code) {
-            main.post(() -> refused(code));
-        }
-
-        @JavascriptInterface
-        public void at(double seconds, double duration) {
-            Feed.Video video = playing;
-            if (video == null) return;
-            // The last half minute counts as seen; seen videos start from the beginning again.
-            int at = duration > 0 && seconds > duration - 30 ? 0 : (int) seconds;
-            Feed.remember(BroadcastActivity.this, video.id, at);
-        }
-
-        @JavascriptInterface
-        public void state(int state) {
-            // 0 is the end. YouTube would offer more; the state offers silence.
-            Feed.Video video = playing;
-            if (state == 0 && video != null) Feed.remember(BroadcastActivity.this, video.id, 0);
-            if (state == 0) main.post(() -> {
-                switchOff();
-                standby(t("TRANSMISSION ENDED.\nREMAIN TUNED.", "SENDUNG BEENDET.\nBLEIBEN SIE EMPFANGSBEREIT."));
-            });
         }
     }
 
@@ -550,39 +471,11 @@ public class BroadcastActivity extends StateActivity {
 
     /** Takes the player off the screen and frees it. */
     private void switchOff() {
-        closeFullscreen();
+        fullscreen.close();
         standby.setOnClickListener(null);
         if (player == null) return;
         screen.removeView(player);
         player.destroy();
         player = null;
-    }
-
-    private void openFullscreen(View view, WebChromeClient.CustomViewCallback callback) {
-        if (fullscreen != null) {
-            callback.onCustomViewHidden();
-            return;
-        }
-        fullscreen = view;
-        leaveFullscreen = callback;
-        view.setBackgroundColor(0xFF000000);
-        glass.addView(view, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT, backFromFullscreen);
-    }
-
-    private void closeFullscreen() {
-        if (fullscreen == null) return;
-        glass.removeView(fullscreen);
-        fullscreen = null;
-        WebChromeClient.CustomViewCallback done = leaveFullscreen;
-        leaveFullscreen = null;
-        getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(backFromFullscreen);
-        getWindow().getInsetsController().show(WindowInsets.Type.navigationBars());
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        if (done != null) done.onCustomViewHidden();
     }
 }

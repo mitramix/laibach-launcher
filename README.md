@@ -69,8 +69,8 @@ default.
 |---|---|
 | **Package** | `dev.laibach.launcher` |
 | **Version** | 2.8, *The Exchange* |
-| **Source** | 102 Java files, no libraries, no Gradle |
-| **Size** | about 247 KB |
+| **Source** | 106 Java files, no libraries, no Gradle |
+| **Size** | about 265 KB |
 | **Requires** | Android 12 (API 31) or later |
 
 **Statement of origin.** All artwork and text of the launcher are original
@@ -129,14 +129,33 @@ of the home screen extends `HomePart` and draws with the shared tools in
 | **Programmes** | `App`, `ProgrammeAdapter` (rows, grids, ministry headers), `Counter` (opening a programme past the quotas, the ration, the queue and the coupons), `WaitingRoom`, `ProgrammeMenu`, `Ministry`, `Quotas`, `Formation` |
 | **Menus and orders** | `GearMenu`, `Orders`, `CallUps`, `PowerRation`, `StateMenu`, `Tiles` (quick-settings switches) |
 | **The lock** | `Terminal` (the seal's policy), `Seal` (the hold-to-unlock seal), `Dots`, `LockWallpaper` |
-| **Broadcast and news** | `Feed` (the channel's Atom feeds, resume and watch later), `Bulletins` (concerts and news), `WallArt` (the approved art of the day), `DecreeListener` (counts notifications, never reads them) |
-| **Darkroom and art** | `Censor` (develops and redacts), `Plate` (the photograph on the table), `Specimen` (the drawn test subject), `DarkroomProvider`, `TextCensor`, `PosterPress`, `Wall` (the Volkskunst gallery wall) |
+| **Broadcast and news** | `Feed` (the channel's Atom feeds, resume and watch later), `Player` (the embedded player, kept to its own page), `Fullscreen`, `Bulletins` (concerts and news), `WallArt` (the approved art of the day), `DecreeListener` (counts notifications, never reads them) |
+| **Darkroom and art** | `Censor` (develops and redacts), `Prints` (reading, drawing, filing and sharing prints), `Plate` (the photograph on the table), `Specimen` (the drawn test subject), `DarkroomProvider`, `TextCensor`, `PosterPress`, `Wall` (the Volkskunst gallery wall) |
 | **Sound** | `Tones` (every sound, synthesised), `Anthems` (the sounds handed to the system), `Hourly` (the anthem of the hour), `Morse`, `Alarm` (reveille) |
-| **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Variant` (the uniforms), `Backdrop`, `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
+| **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Variant` (the uniforms), `Backdrop` (the album scenes) on `Stage` (their shared props), `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
 | **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Drills`, `Comrades`, `Qr`, `ExitVisa` |
 | **Copies that leave** | `Exports` (cards, pictures, sharing), `CaseFile` (the PDF case file), `Backup` (settings saved and restored) |
 | **Honours** | `Stamps` (the album), `StampArt` (glyphs, stamps and medals), `Ceremony`, `Promotion`, `Foundation` |
-| **Language** | `Lang`, `Slovene` (every English string has its Slovenian) |
+| **Language** | `Lang`, `Slovene` (reads `slovene.txt`, every English string beside its Slovenian) |
+
+#### How the organs are bound
+
+- **One screen, one activity.** An activity builds its screen and answers the
+  system. Anything that can be drawn on its own is a view of its own (`Wall`,
+  `Plate`, `Seal`, `Player`, `Backdrop`), told only what it needs through a
+  small `Host` interface the activity fills in.
+- **Parts report to their screen.** The home screen's parts and the papers'
+  sections each get the screen they stand in and nothing else; one part asks
+  another through that screen, never directly.
+- **The state's records live outside the screens.** What more than one screen
+  reads (the feed, the seal's policy, the comrades, the record, the citizen)
+  is a plain class with static methods taking a `Context`, so no screen reaches
+  into another. Screens refer to one another only to open them, by
+  `X.class` and the extras the opened screen names.
+- **Most-used**: `Variant` (the uniform) and `Lang`, `Record` and `Citizen`,
+  which nearly every organ consults.
+- **Size.** No source file is longer than 500 lines. The Slovenian texts are
+  data, not code, and are kept as a table.
 
 ### ■ Installation over adb
 
@@ -1034,7 +1053,9 @@ preferences) and is enforced on the terminal, its menus and dialogs, the
 papers, Laibach TV and the Volkskunst gallery. Names of programmes remain as
 Android issues them.
 
-Slovenian (since 2.3) is looked up from the English text in `Slovene.java`.
+Slovenian (since 2.3) is looked up from the English text in `slovene.txt`, a
+plain table beside `Slovene.java`: one text a line, English and Slovenian split
+by a tab. Corrections are made there; no code changes.
 A text without a Slovenian version is delivered in English. Dates and numbers
 follow the Slovenian locale.
 
