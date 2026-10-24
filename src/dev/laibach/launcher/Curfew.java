@@ -18,9 +18,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-/** The rest notice that covers the home screen from 23:00 to 06:00, and its drill. */
+/**
+ * The rest notice that covers the home screen from 23:00 to 06:00, and its
+ * drill. Five minutes before, the ticker counts down and the uniform darkens
+ * minute by minute.
+ */
 final class Curfew extends HomePart {
+    /** The minutes of warning before the curfew. */
+    static final int WARNING = 5;
     View view;
+    /** The dusk laid over the uniform while the curfew approaches. */
+    View dusk;
     TextView note;
     TextView time;
     /** A drill is under way: the curfew shows whatever the hour. */
@@ -110,6 +118,27 @@ final class Curfew extends HomePart {
         return c;
     }
 
+    /** The dusk: a shade over the screen, under the curfew itself, that deepens as the curfew nears. */
+    View buildDusk() {
+        dusk = new View(home);
+        dusk.setBackgroundColor(0xFF000000);
+        dusk.setVisibility(View.GONE);
+        return dusk;
+    }
+
+    /** Minutes until the curfew, from {@link #WARNING} down to 1, or 0 when none is coming. */
+    int warning() {
+        if (!Citizen.curfewOn(home) || drill) return 0;
+        Calendar now = Calendar.getInstance();
+        return warning(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE));
+    }
+
+    /** Minutes from the given minute of the day until 23:00, when that is within the warning; otherwise 0. */
+    static int warning(int minuteOfDay) {
+        int left = 23 * 60 - minuteOfDay;
+        return left >= 1 && left <= WARNING ? left : 0;
+    }
+
     TextView action(String text, Intent intent) {
         TextView a = type(16, v.ink, 40, 850);
         a.setText(text);
@@ -123,6 +152,10 @@ final class Curfew extends HomePart {
         boolean on = drill || Citizen.curfew(home);
         if (on && !showing()) home.reset();
         view.setVisibility(on ? View.VISIBLE : View.GONE);
+        int left = on ? 0 : warning();
+        dusk.setVisibility(left > 0 ? View.VISIBLE : View.GONE);
+        // From a tenth of the way dark, five minutes out, to more than half at the last minute.
+        dusk.setAlpha(0.1f + 0.12f * (WARNING - left));
         if (!on) return;
         Calendar now = Calendar.getInstance();
         time.setText(new SimpleDateFormat("HH:mm", locale).format(now.getTime()));

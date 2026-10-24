@@ -164,6 +164,7 @@ public class HomeActivity extends StateActivity {
     boolean charging;
     int iconPx;
     Ticker ticker;
+    DeadDrop deadDrop;
     Boot boot;
     FrameLayout frame;
     View crt;
@@ -199,6 +200,7 @@ public class HomeActivity extends StateActivity {
         public void onReceive(Context context, Intent intent) {
             updateClock();
             updateState();
+            Hourly.tick(context);
             if (mobilisedShown != (Citizen.mobilisedUntil(context) > 0)) applyFilter();
         }
     };
@@ -313,6 +315,8 @@ public class HomeActivity extends StateActivity {
                 {t("> CALIBRATING ENTHUSIASM", "> BEGEISTERUNG KALIBRIEREN"), "112%"},
                 {t("> SYNCHRONISING OPINIONS", "> MEINUNGEN ABGLEICHEN"), "OK"},
                 {t("> SCANNING FOR DISSENT", "> NACH ABWEICHUNG SUCHEN"), t("NONE", "KEINE")},
+                {t("> CONTROLLING THE WEATHER", "> WETTER KONTROLLIEREN"), String.format(java.util.Locale.ROOT, "%+d°",
+                        Math.round(Weather.now()))},
                 {"> UNIFORM", v.name},
                 {"  " + v.motto(german), ""},
                 {t("> STANDING", "> ANSEHEN"), Lang.pick(german, Citizen.STANDING[Citizen.grade(this)]).substring(0, 1)},
@@ -393,6 +397,7 @@ public class HomeActivity extends StateActivity {
         rollCall = new RollCall(this);
         frame.addView(rollCall.build());
         curfew = new Curfew(this);
+        frame.addView(curfew.buildDusk());
         frame.addView(curfew.build());
         regulations = new Regulations(this);
         waitingRoom = new WaitingRoom(this);
@@ -493,6 +498,8 @@ public class HomeActivity extends StateActivity {
         });
         showSlogan();
         mon.addView(slogan);
+        deadDrop = new DeadDrop(this);
+        mon.addView(deadDrop.build());
 
         ledger = new Ledger(this);
         mon.addView(ledger.build());

@@ -648,6 +648,33 @@ final class Slovene {
         SL.put("PRINT DEVELOPED", "FOTOGRAFIJA RAZVITA");
         SL.put("WEEKLY REPORT READ", "TEDENSKO POROČILO PREBRANO");
         SL.put("FOUNDATION DAY", "DAN USTANOVITVE");
+        SL.put("Sealed. Hold to unseal.", "Zapečateno. Pridržite za odpečatenje.");
+        SL.put("■ SEALED DECREE · HOLD TO UNSEAL", "■ ZAPEČATEN ODLOK · PRIDRŽITE ZA ODPEČATENJE");
+        SL.put("■ UNSEALED · IT WILL BE SEALED AGAIN", "■ ODPEČATENO · ZNOVA BO ZAPEČATENO");
+        SL.put("A note for yourself alone", "Zapisek samo zase");
+        SL.put("Kept on the home screen with every letter blacked out. Hold it to read it.", "Hrani se na domačem zaslonu, vsaka črka je počrnjena. Pridržite ga, da ga preberete.");
+        SL.put("Dead drop", "Mrtvi nabiralnik");
+        SL.put("Empty it", "Izprazni");
+        SL.put("The dead drop is empty.", "Mrtvi nabiralnik je prazen.");
+        SL.put("Sealed. It waits on the home screen.", "Zapečateno. Čaka na domačem zaslonu.");
+        SL.put("> CONTROLLING THE WEATHER", "> NADZOR NAD VREMENOM");
+        SL.put("CURFEW IN 1 MINUTE. PREPARE FOR REST", "POLICIJSKA URA ČEZ 1 MINUTO. PRIPRAVITE SE NA POČITEK");
+        SL.put("CURFEW IN %d MINUTES. PREPARE FOR REST", "POLICIJSKA URA ČEZ %d MIN. PRIPRAVITE SE NA POČITEK");
+        SL.put("SUN %d° ABOVE THE HORIZON, AS PLANNED", "SONCE %d° NAD OBZORJEM, KOT NAČRTOVANO");
+        SL.put("TWILIGHT AUTHORISED", "SOMRAK ODOBREN");
+        SL.put("SUN %d° BELOW THE HORIZON, ON SCHEDULE", "SONCE %d° POD OBZORJEM, PO RAZPOREDU");
+        SL.put("WEATHER: CONTROLLED. ", "VREME: NADZOROVANO. ");
+        SL.put("SUNRISE AT %s BY DECREE", "SONČNI VZHOD OB %s PO ODLOKU");
+        SL.put("SUNSET AT %s BY DECREE", "SONČNI ZAHOD OB %s PO ODLOKU");
+        SL.put("Anthem of the hour", "Himna ob polni uri");
+        SL.put("on the hour while the home screen is open; never when silent, in do not disturb or from 22:00 to 07:00", "ob polni uri, ko je domači zaslon odprt; nikoli v tihem načinu, pri Ne moti ali od 22:00 do 07:00");
+        SL.put("Typewriter", "Pisalni stroj");
+        SL.put("keys strike at the censor's desk and on the memo", "tipke udarjajo na cenzorjevi mizi in na zapisniku");
+        SL.put("DEAD DROP", "MRTVI NABIRALNIK");
+        SL.put("Sealed note", "Zapečaten zapisek");
+        SL.put("a note of your own on the home screen, blacked out; hold it to read it", "lasten zapisek na domačem zaslonu, počrnjen; pridržite ga, da ga preberete");
+        SL.put("SEALED", "ZAPEČATENO");
+        SL.put("EMPTY", "PRAZNO");
     }
 
     private Slovene() {}

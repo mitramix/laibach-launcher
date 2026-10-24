@@ -122,6 +122,17 @@ final class Orders extends HomePart {
                 Tones.setOn(home, !Tones.on(home));
                 if (Tones.on(home)) Tones.play(home, Tones.charging());
                 return true;
+            case 28:
+                Tones.setTypewriter(home, !Tones.typewriter(home));
+                Tones.type(home, Tones.typing(6));
+                return true;
+            case 29:
+                Hourly.setOn(home, !Hourly.on(home));
+                if (Hourly.on(home)) Tones.play(home, Tones.hourly(java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)));
+                return true;
+            case 33:
+                home.deadDrop.edit();
+                return true;
             case 22:
                 Morse.setOn(home, !Morse.on(home));
                 if (Morse.on(home)) Morse.tap(home, true);

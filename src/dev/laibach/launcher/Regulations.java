@@ -64,6 +64,12 @@ final class Regulations extends HomePart {
         section(page, t("SOUND", "KLANG"));
         toggle(page, t("Sounds", "Klänge"), t("chimes, clicks, the stamp, the start-up",
                 "Signale, Klicks, der Stempel, der Start"), Tones.on(home), 21);
+        toggle(page, t("Anthem of the hour", "Hymne zur vollen Stunde"),
+                t("on the hour while the home screen is open; never when silent, in do not disturb or from 22:00 to 07:00",
+                        "zur vollen Stunde bei offenem Startbildschirm; nie lautlos, bei Nicht stören oder von 22:00 bis 07:00"),
+                Hourly.on(home), 29);
+        toggle(page, t("Typewriter", "Schreibmaschine"), t("keys strike at the censor's desk and on the memo",
+                "Tasten schlagen am Tisch des Zensors und auf der Aktennotiz"), Tones.typewriter(home), 28);
         toggle(page, t("Morse vibration", "Morse-Vibration"), t("new decrees are tapped out",
                 "neue Erlasse werden gemorst"), Morse.on(home), 22);
         line(page, t("Issue sounds to the phone", "Klänge ans Telefon ausgeben"),
@@ -104,6 +110,12 @@ final class Regulations extends HomePart {
                 refresh();
             });
         }
+
+        section(page, t("DEAD DROP", "TOTER BRIEFKASTEN"));
+        boolean dropped = !DeadDrop.note(home).isEmpty();
+        line(page, t("Sealed note", "Versiegelte Notiz"), t("a note of your own on the home screen, blacked out; hold it to read it",
+                        "eine eigene Notiz auf dem Startbildschirm, geschwärzt; halten, um sie zu lesen"),
+                dropped ? t("SEALED", "VERSIEGELT") : t("EMPTY", "LEER"), dropped, x -> home.orders.act(33));
 
         section(page, t("CAMERA", "KAMERA"));
         toggle(page, t("Laibach Camera", "Laibach-Kamera"), t("its icon and its place in the share menu",

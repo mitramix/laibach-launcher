@@ -9,11 +9,13 @@ import android.media.AudioTrack;
  * The state's sounds, synthesised here and nowhere recorded: a bell, a short
  * fanfare of the state's own, a chime for the power ration, a boot chime
  * pitched for each uniform, a call of each uniform's own, the click of a
- * relay, the rubber stamp, the shutter and the decree in Morse. All are off until the owner turns them on in the
+ * relay, the rubber stamp, the shutter, the decree in Morse, the anthem of the
+ * hour and the typewriter's keys. All are off until the owner turns them on in the
  * menu (Public order → sounds); the alarm rings whatever that setting says.
  */
 final class Tones {
     private static final String KEY = "sounds";
+    private static final String KEY_TYPEWRITER = "typewriter";
     private static final int RATE = 22_050;
 
     private Tones() {}
@@ -24,6 +26,20 @@ final class Tones {
 
     static void setOn(Context c, boolean on) {
         c.getSharedPreferences(Variant.PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY, on).apply();
+    }
+
+    /** Whether the typewriter is heard at the censor's desk and on the memo (and the sounds are on). */
+    static boolean typewriter(Context c) {
+        return c.getSharedPreferences(Variant.PREFS, Context.MODE_PRIVATE).getBoolean(KEY_TYPEWRITER, false);
+    }
+
+    static void setTypewriter(Context c, boolean on) {
+        c.getSharedPreferences(Variant.PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_TYPEWRITER, on).apply();
+    }
+
+    /** Plays a typewriter's sound, if the owner wants the typewriter heard. */
+    static void type(Context c, short[] pcm) {
+        if (typewriter(c)) play(c, pcm);
     }
 
     /** A struck bell: inharmonic partials, each dying away at its own pace. */
@@ -62,6 +78,58 @@ final class Tones {
                     + 0.3 * Math.sin(6 * Math.PI * f * t) + 0.15 * Math.sin(8 * Math.PI * f * t);
             return s * env * 0.22;
         });
+    }
+
+    /**
+     * The anthem of the hour: brass climbing a fifth, stepping back to the
+     * fourth and landing on the octave. Each hour of the clock has its own key,
+     * a semitone above the hour before. Original, and two seconds long.
+     */
+    static short[] hourly(int hour) {
+        double base = 174.6 * Math.pow(2, (hour % 12) / 12.0);
+        return notes(Tones::brassAt, 2.2, base, new double[][]{
+                {0, 0.24, 0}, {0.27, 0.24, 7}, {0.54, 0.2, 5}, {0.78, 1.1, 12}});
+    }
+
+    /** A typewriter's key: the type bar striking the platen, a little different each time. */
+    static short[] key() {
+        java.util.Random noise = new java.util.Random();
+        double pitch = 1700 + noise.nextInt(500);
+        return render(0.07, t -> (noise.nextDouble() * 2 - 1) * Math.exp(-180 * t) * 0.6
+                + Math.sin(2 * Math.PI * pitch * t) * Math.exp(-90 * t) * 0.25
+                + Math.sin(2 * Math.PI * 140 * t) * Math.exp(-60 * t) * 0.5, 0.45);
+    }
+
+    /** A line typed: keys at a typist's uneven pace, then the bell at the margin and the carriage return. */
+    static short[] typing(int keys) {
+        java.util.Random pace = new java.util.Random();
+        java.util.List<short[]> strikes = new java.util.ArrayList<>();
+        double[] at = new double[keys];
+        double t = 0;
+        for (int i = 0; i < keys; i++) {
+            at[i] = t;
+            strikes.add(key());
+            t += 0.08 + pace.nextDouble() * 0.09;
+        }
+        double bell = t + 0.05, carriage = bell + 0.25;
+        short[] ding = render(0.5, x -> Math.sin(2 * Math.PI * 2490 * x) * Math.exp(-7 * x)
+                + 0.4 * Math.sin(2 * Math.PI * 4980 * x) * Math.exp(-11 * x), 0.35);
+        java.util.Random noise = new java.util.Random(5);
+        short[] zip = render(0.35, x -> (noise.nextDouble() * 2 - 1) * Math.min(1, x * 30) * Math.exp(-9 * x)
+                * (0.6 + 0.4 * Math.sin(2 * Math.PI * 38 * x)), 0.3);
+        int length = (int) ((carriage + 0.35) * RATE);
+        int[] mix = new int[length];
+        for (int i = 0; i < keys; i++) add(mix, strikes.get(i), at[i]);
+        add(mix, ding, bell);
+        add(mix, zip, carriage);
+        short[] out = new short[length];
+        for (int i = 0; i < length; i++) out[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, mix[i]));
+        return out;
+    }
+
+    private static void add(int[] mix, short[] sound, double at) {
+        int from = (int) (at * RATE);
+        for (int i = 0; i < sound.length && from + i < mix.length; i++) mix[from + i] += sound[i];
     }
 
     /** Three rising pings: the power ration replenished. */

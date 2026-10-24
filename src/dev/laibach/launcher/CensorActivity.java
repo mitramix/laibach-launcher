@@ -271,6 +271,7 @@ public class CensorActivity extends StateActivity {
                     TextCensor.Word w = TextCensor.at(words, sheet.getOffsetForPosition(e.getX(), e.getY()));
                     if (w != null) {
                         w.redacted = !w.redacted;
+                        Tones.type(CensorActivity.this, Tones.key());
                         show();
                     }
                     view.performClick();
@@ -332,6 +333,7 @@ public class CensorActivity extends StateActivity {
         if (busy || text == null) return;
         busy = true;
         show();
+        Tones.type(this, Tones.typing(14));
         String body = text.length() > MAX_MEMO ? text.substring(0, MAX_MEMO) + " …" : text;
         List<TextCensor.Word> bars = TextCensor.read(body);
         // The owner's own choices carry over; words past the cut are dropped with the text.

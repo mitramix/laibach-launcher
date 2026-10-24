@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/VERSION-2.6%20THE%20RECORD-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.6, The Record">
+  <img src="https://img.shields.io/badge/VERSION-2.7%20THE%20WEATHER-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Version 2.7, The Weather">
   <img src="https://img.shields.io/badge/ANDROID-12%2B-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="Android 12 or later">
-  <img src="https://img.shields.io/badge/SIZE-~235%20KB-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="About 235 KB">
+  <img src="https://img.shields.io/badge/SIZE-~247%20KB-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="About 247 KB">
   <img src="https://img.shields.io/badge/LIBRARIES-NONE-ECE6D6?style=flat-square&labelColor=0A0A0A" alt="No libraries">
   <img src="https://img.shields.io/badge/LANGUAGES-EN%20%C2%B7%20DE%20%C2%B7%20SL-C1121F?style=flat-square&labelColor=0A0A0A" alt="English, German, Slovenian">
 </p>
@@ -68,9 +68,9 @@ default.
 | | |
 |---|---|
 | **Package** | `dev.laibach.launcher` |
-| **Version** | 2.6, *The Record* |
-| **Source** | 71 Java files, no libraries, no Gradle |
-| **Size** | about 235 KB |
+| **Version** | 2.7, *The Weather* |
+| **Source** | 74 Java files, no libraries, no Gradle |
+| **Size** | about 247 KB |
 | **Requires** | Android 12 (API 31) or later |
 
 **Statement of origin.** All artwork and text of the launcher are original
@@ -124,9 +124,10 @@ of the home screen extends `HomePart` and draws with the shared tools in
 | Organ | Files |
 |---|---|
 | **Screens** | `StateActivity` (shared uniform and type), `HomeActivity`, `PapersActivity`, `LockActivity`, `CensorActivity`, `DarkroomActivity`, `VolkskunstActivity`, `BroadcastActivity`, `AlarmActivity` |
-| **Home screen parts** | `HomePart` (base), `Ledger` (number, standing, ration, life force), `Decrees`, `OnAir`, `ArtCredit`, `News` (the ticker's text), `Curfew`, `RollCall`, `Regulations` |
+| **Home screen parts** | `HomePart` (base), `Ledger` (number, standing, ration, life force), `Decrees`, `OnAir`, `ArtCredit`, `News` (the ticker's text), `Weather` (the sun, from the clock alone), `Curfew`, `RollCall`, `DeadDrop`, `Regulations` |
 | **Programmes** | `App`, `ProgrammeAdapter` (rows, grids, ministry headers), `Counter` (opening a programme past the quotas, the ration, the queue and the coupons), `WaitingRoom`, `ProgrammeMenu`, `Ministry`, `Quotas`, `Formation` |
 | **Menus and orders** | `GearMenu`, `Orders`, `CallUps`, `PowerRation`, `StateMenu` |
+| **Sound** | `Tones` (every sound, synthesised), `Hourly` (the anthem of the hour), `Morse` |
 | **Effects** | `Fx` (the shared clock), `Cyber` (shared drawing), `Backdrop`, `Crt`, `GlitchText`, `Eye`, `Pulse`, `Ticker`, `Boot`, `EmblemView`, `ArtView`, `RationBar` |
 | **The citizen** | `Citizen`, `Attention` (usage events, read on the phone only), `Norm`, `NumberCheck`, `Record`, `Report`, `Constitution`, `Exports`, `ExitVisa` |
 | **Honours** | `Stamps` (the album), `StampArt` (glyphs, stamps and medals), `Ceremony`, `Promotion`, `Foundation` |
@@ -519,6 +520,8 @@ The informant reports only to the citizen. Nothing leaves the phone.
 - **Hold** `HOLD TO REQUEST AN EXEMPTION` for 30 minutes of ordinary use. A tap
   only explains that it must be held. Each exemption lowers today's standing
   by one grade.
+- From 22:55 the ticker counts down (`CURFEW IN 5 MINUTES. PREPARE FOR REST`) and
+  the uniform darkens a little more each minute.
 - **Menu → Duties → Curfew drill** shows the curfew screen at any hour.
   Holding the button ends the drill without penalty.
 - **Menu → Settings → Curfew** suspends it (`OFF`) and reinstates it
@@ -628,6 +631,15 @@ the citizen is offered **Renounce joy** or **Open anyway (noted)**. Each
 "open anyway" lowers today's standing by one grade. Coupons and debts are
 reset at midnight.
 
+### ■ The dead drop
+
+**Settings → Dead drop → Sealed note** leaves a note of up to 140 letters for
+the citizen alone. It lies on the home screen under the date as a sealed
+decree, every letter blacked out. **Hold** it and it is unsealed for six
+seconds, then sealed again. The record notes that a note was left and that
+the drop was opened, never what the note says. **Empty it** takes it away.
+The note stays on the phone.
+
 ### ■ Lesser provisions
 
 - A search that finds nothing reports `NO SUCH PROGRAMME HAS EVER EXISTED.`
@@ -650,7 +662,7 @@ the effect files beside it, `Fx.java`). No images or fonts were added.
 | **Glitches** | Every 4 to 13 seconds the whole state fails at once for about a fifth of a second, sometimes longer. The clock, the LAIBACH name and the large curfew and roll-call headings split into red and cyan and tear into slices. Coloured tear bars cross the screen. |
 | **The eye** | Beside the status in the masthead, an eye watches. It blinks every six seconds or so and has a red recording light. |
 | **Pulse** | An ECG line under the ration bar shows the citizen's heartbeat as the state assumes it: 64 BPM at standing A, plus 9 for each grade lower, plus 12 when the ration is overdrawn. |
-| **Broadcast** | A red ticker above the command line runs the state's news: `YOUR THOUGHTS ARE BACKED UP HOURLY`, `THE ALGORITHM LOVES YOU`, `WEATHER: CONTROLLED`, `DISSENT HAS BEEN DEPRECATED`, and the citizen's own number, under observation. |
+| **Broadcast** | A red ticker above the command line runs the state's news: `YOUR THOUGHTS ARE BACKED UP HOURLY`, `THE ALGORITHM LOVES YOU`, `DISSENT HAS BEEN DEPRECATED`, and the citizen's own number, under observation. It opens with the weather, which is controlled: `WEATHER: CONTROLLED. SUN 23° ABOVE THE HORIZON, AS PLANNED. SUNSET AT 17:58 BY DECREE`. The sun is worked out from the clock and the time zone alone, at the capital's latitude; no location is asked for. |
 | **Badges** | Every programme's icon is recoloured in two tones of the uniform, put under scanlines in a disc and set into the uniform's emblem in the accent colour, with a neon ring. Each programme receives a file number, `ID·F150`. |
 | **Emblem** | The disc glows in the second neon, pulsing four times a turn. |
 
@@ -799,6 +811,14 @@ the backup.
   and when the reveille rings, the phone taps L A I B A C H in Morse on the
   citizen's hand. Calls keep their own vibration; Android permits no other
   app to set it.
+- **Anthem of the hour** (Settings). Off by default. On the hour, while the
+  home screen is open, a short brass chime, pitched for the hour. It is silent
+  when the phone is silent or set to vibrate, under do not disturb, during a
+  call, through the curfew and from 22:00 to 07:00.
+- **Typewriter** (Settings). Off by default. Keys strike as words are blacked
+  out at the censor's desk, and a line is typed, with its bell and carriage
+  return, when the memo is issued.
+- Both are heard only while the sounds are on.
 
 ### ■ Quick-settings tiles
 
@@ -1019,6 +1039,7 @@ The state was built in stages. Each stage was fulfilled ahead of schedule.
 | **2.4.2** | — | Every citizen is renumbered: the full 64-bit Android ID as 20 digits and a Damm check digit. No two phones share a number. |
 | **2.5** | The Plan | The daily norm, ministry quotas and inventory, the waiting room, the informant in the weekly report, and the number check at the counter. The terminal is rebuilt from separate organs. |
 | **2.6** | The Record | The exit visa for every redaction and banishment, ceremonies for promotions and attendance, Foundation Day with its extra joy coupon, the stamp album, and the identity card shared as a specimen. |
+| **2.7** | The Weather | Controlled weather from the sun's true position, worked out from the clock alone; a five-minute curfew warning; the dead drop; the anthem of the hour; and the typewriter at the censor's desk. |
 
 <details>
 <summary><b>🔍 Findings of the inspectorate</b></summary>
