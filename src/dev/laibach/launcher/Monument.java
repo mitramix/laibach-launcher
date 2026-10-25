@@ -36,7 +36,7 @@ final class Monument extends HomePart {
     }
 
     /**
-     * The clock with the watch beside it, the date and proclamation, and the
+     * The clock with the network status beside it, the date and proclamation, and the
      * parts given standing under them in order.
      */
     View build(View watch, View... parts) {
@@ -58,7 +58,7 @@ final class Monument extends HomePart {
             home.gearMenu.show(view);
             return true;
         });
-        // The watch stands level with the clock, on the side away from the hour;
+        // The status stands level with the clock, on the side away from the hour;
         // the clock keeps to the room left, so the two never touch.
         LinearLayout face = row();
         face.setGravity(Gravity.CENTER_VERTICAL);

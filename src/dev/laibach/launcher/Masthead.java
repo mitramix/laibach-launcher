@@ -10,20 +10,19 @@ import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * The masthead: the emblem (one tap opens the menu) and the band's name over
- * the device line. The watching eye and the network status stand apart, in
+ * The masthead: the emblem (one tap opens the menu), the band's name and the
+ * watching eye over the device line. The network status stands apart, in
  * {@link #watch}, for the monument to set beside the clock.
  */
 final class Masthead extends HomePart {
     private TextView labels;
     private TextView values;
     private TextView device;
-    /** The eye over the status: the network, the VPN and the uniform in force. */
+    /** The network and the VPN, as the state sees them. */
     View watch;
 
     Masthead(HomeActivity home) {
@@ -46,6 +45,11 @@ final class Masthead extends HomePart {
         name.setGravity(Gravity.CENTER_VERTICAL);
         name.setAutoSizeTextTypeUniformWithConfiguration(18, 34, 1, TypedValue.COMPLEX_UNIT_SP);
         mast.addView(name, new LinearLayout.LayoutParams(0, dp(44), 1f));
+        LinearLayout.LayoutParams eyeAt = new LinearLayout.LayoutParams(dp(34), dp(20));
+        eyeAt.leftMargin = dp(10);
+        View eye = new Eye(home, v);
+        eye.setContentDescription(t("The state is watching", "Der Staat sieht zu"));
+        mast.addView(eye, eyeAt);
         root.addView(mast);
         root.addView(rule(v.accent), ruleParams(dp(5), dp(8), dp(6)));
         device = type(10, v.muted, 80, 600);
@@ -58,31 +62,21 @@ final class Masthead extends HomePart {
         watch = buildWatch();
     }
 
-    /** The eye over a small table, on the side of the clock away from the hour. */
+    /** A small table, on the side of the clock away from the hour. */
     private View buildWatch() {
-        int side = home.formation.gravity == Gravity.END ? Gravity.START : Gravity.END;
-        LinearLayout box = column();
-        box.setGravity(side);
-        View eye = new Eye(home, v);
-        eye.setContentDescription(t("The state is watching", "Der Staat sieht zu"));
-        box.addView(eye, new LinearLayout.LayoutParams(dp(34), dp(20)));
         LinearLayout table = row();
         labels = type(10, v.muted, 80, 600);
         labels.setLetterSpacing(0.12f);
-        labels.setText(t("NETWORK", "NETZ") + "\nVPN\n" + t("UNIFORM", "UNIFORM"));
+        labels.setText(t("NETWORK", "NETZ") + "\nVPN");
         table.addView(labels);
         values = type(10, v.ink, 70, 750);
         values.setLetterSpacing(0.12f);
         values.setPadding(dp(10), 0, 0, 0);
         table.addView(values);
-        LinearLayout.LayoutParams under = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        under.topMargin = dp(8);
-        box.addView(table, under);
-        return box;
+        return table;
     }
 
-    /** The network as the state sees it, the uniform worn, and the system the citizen runs. */
+    /** The network as the state sees it, and the system the citizen runs. */
     void update() {
         ConnectivityManager cm = home.getSystemService(ConnectivityManager.class);
         NetworkCapabilities caps = cm.getNetworkCapabilities(cm.getActiveNetwork());
@@ -99,7 +93,6 @@ final class Masthead extends HomePart {
             if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) flag(s, t("NOTED", "VERMERKT"));
             else s.append(t("NONE", "KEINE"));
         }
-        s.append('\n').append(v.name);
         values.setText(s);
         device.setText((t("LAIBACH LIFE™ ", "LAIBACH LEBEN™ ") + home.version()
                 + " — ANDROID " + Build.VERSION.RELEASE).toUpperCase(locale));
