@@ -32,7 +32,8 @@ final class Masthead extends HomePart {
         TextView name = glitch(34, v.ink, 25, 1000);
         name.setText("LAIBACH");
         name.setLetterSpacing(0.14f);
-        name.setSingleLine(true);
+        // One line, but not setSingleLine: that measures as endlessly wide and the name never shrinks.
+        name.setMaxLines(1);
         name.setPadding(dp(12), 0, 0, 0);
         name.setGravity(Gravity.CENTER_VERTICAL);
         // Long uniform names take room from the band's, which shrinks rather than loses letters.
@@ -65,7 +66,7 @@ final class Masthead extends HomePart {
         NetworkCapabilities caps = cm.getNetworkCapabilities(cm.getActiveNetwork());
         String net;
         if (caps == null) {
-            net = t("OFF GRID (REPORTED)", "NETZFREI (GEMELDET)");
+            net = t("OFF GRID\n(REPORTED)", "NETZFREI\n(GEMELDET)");
         } else {
             net = (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ? t("WI-FI", "WLAN") : t("NETWORK", "NETZ"))
                     + (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ? t("\nVPN (NOTED)", "\nVPN (VERMERKT)") : "");
