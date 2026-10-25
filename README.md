@@ -88,8 +88,7 @@ in the app.
 ### ■ Report for duty
 
 1. Download **[`laibach-launcher.apk`](https://github.com/mitramix/laibach-launcher/releases/latest/download/laibach-launcher.apk)**,
-   the latest release. Earlier issues are filed under
-   [Releases](https://github.com/mitramix/laibach-launcher/releases).
+   the current issue. Earlier issues have been withdrawn from circulation.
 2. Open it on the phone. Android will ask permission to install from this
    source. Grant it.
 3. Make it the home screen: Settings → Apps → Default apps → Home app →
