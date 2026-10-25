@@ -47,6 +47,8 @@ final class Masthead extends HomePart {
         mast.addView(name, new LinearLayout.LayoutParams(0, dp(44), 1f));
         LinearLayout.LayoutParams eyeAt = new LinearLayout.LayoutParams(dp(34), dp(20));
         eyeAt.leftMargin = dp(10);
+        // Held back from the edge, so the eye does not crowd the glass.
+        eyeAt.rightMargin = dp(10);
         View eye = new Eye(home, v);
         eye.setContentDescription(t("The state is watching", "Der Staat sieht zu"));
         mast.addView(eye, eyeAt);
@@ -65,6 +67,9 @@ final class Masthead extends HomePart {
     /** A small table, on the side of the clock away from the hour. */
     private View buildWatch() {
         LinearLayout table = row();
+        // Held back from the screen's edge, on whichever side it stands.
+        if (home.formation.gravity == Gravity.END) table.setPadding(dp(10), 0, 0, 0);
+        else table.setPadding(0, 0, dp(10), 0);
         labels = type(10, v.muted, 80, 600);
         labels.setLetterSpacing(0.12f);
         labels.setText(t("NETWORK", "NETZ") + "\nVPN");
