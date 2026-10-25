@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/mitramix/laibach-launcher/releases/latest/download/laibach-launcher.apk"><img src="https://img.shields.io/badge/%E2%96%BC%20REPORT%20FOR%20DUTY-DOWNLOAD%20THE%20LATEST%20APK-C1121F?style=for-the-badge&labelColor=0A0A0A" alt="Download the latest APK"></a>
+  <a href="docs/promo/laibach-life-promo.mp4"><img src="https://img.shields.io/badge/%E2%96%B6%20THE%20FILM-WATCH%20THE%20PROMO%20(48%20S)-ECE6D6?style=for-the-badge&labelColor=0A0A0A" alt="Watch the promo film"></a>
 </p>
 
 <p align="center">
@@ -191,6 +192,15 @@ Recorded in English on an Android 17 phone. The picture behind the terminal
 is the day's approved art from the Volkskunst gallery on laibach.org,
 credited on screen. Stills from Laibach TV are pixelated here. They are the
 property of the channel.
+
+### ■ The film
+
+<p align="center">
+  <a href="docs/promo/laibach-life-promo.mp4"><img src="docs/promo/poster.jpg" width="80%" alt="Still from the promo film: YOUR PHONE, UNDER NEW MANAGEMENT."></a>
+</p>
+
+Forty-eight seconds, cut from the stills below. The soundtrack is original.
+Viewing it has been noted.
 
 ### ■ The terminal and its menus
 
