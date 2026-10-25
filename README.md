@@ -252,10 +252,12 @@ could document them.
 
 - **Masthead.** The emblem, whose gear turns once every 24 s around the fixed
   red disc and cross. **Tap the gear for the menu.** Beside it, **LAIBACH**
-  in Roboto Flex at its narrowest and heaviest, and the network status with
-  the uniform in force (`WI-FI`, `VPN (NOTED)`, or `OFF GRID (REPORTED)`).
+  in Roboto Flex at its narrowest and heaviest, alone on its line.
   Below: a heavy accent rule and the device line: the version of the launcher
-  and of Android. Android's status bar is withdrawn. Swipe down
+  and of Android. Under the rule, level with the clock and on the side away
+  from the hour, the eye watches over a small table: `NETWORK` (`WI-FI`,
+  `MOBILE`, or `OFF GRID` in red), `VPN` (`NONE`, or `NOTED` in red) and
+  `UNIFORM`. Android's status bar is withdrawn. Swipe down
   from the top edge to recall it.
 - **The monument.** It scrolls away with the list of programmes.
   - A huge clock with the colon in the accent colour. Tap it for alarms.
@@ -731,7 +733,7 @@ the effect files beside it, `Fx.java`). No images or fonts were added.
 | **Backdrop** | The uniform's scene moves behind the clock. In SPECTRE a giant cogwheel turns slowly against a dashed dial, glyphs (`LAIBACH`, `NSK`, binary, Cyrillic, `✚ ■ ▲`) fall like data rain over the upper half, and a neon grid floor advances from the horizon. |
 | **CRT glass** | Scanlines, a vignette and a refresh band rolling down every 7 s lie over everything, including the curfew, the roll call and the papers. Like an old set, the glass flickers faintly now and then of its own accord. |
 | **Glitches** | The whole state fails at once, at moments no one can foresee: the quiet between failures is drawn at random (mostly 3 to 20 seconds), a third of them come as a stutter of two to four quick tears, and about one in twenty-four is a breakdown of a second or more. Each glitch picks its own kinds and strength: the split into the uniform's two neons, slices torn sideways (leaving a hole or a ghost), a shake, dropped blocks, a slipping vertical hold, snow and a flash. Every glitching text has a temper of its own, so a weak glitch passes some by and catches others late. The clock tears by itself as the minute turns. |
-| **The eye** | Beside the status in the masthead, an eye watches. It blinks every six seconds or so and has a red recording light. |
+| **The eye** | Beside the clock, over the network status, an eye watches. It blinks every six seconds or so and has a red recording light. |
 | **Pulse** | An ECG line under the ration bar shows the citizen's heartbeat as the state assumes it: 64 BPM at standing A, plus 9 for each grade lower, plus 12 when the ration is overdrawn. |
 | **Broadcast** | A red ticker above the command line runs the state's news: `YOUR THOUGHTS ARE BACKED UP HOURLY`, `THE ALGORITHM LOVES YOU`, `DISSENT HAS BEEN DEPRECATED`, and the citizen's own number, under observation. It opens with the weather, which is controlled: `WEATHER: CONTROLLED. SUN 23° ABOVE THE HORIZON, AS PLANNED. SUNSET AT 17:58 BY DECREE`. The sun is worked out from the clock and the time zone alone, at the capital's latitude; no location is asked for. |
 | **Badges** | Every programme's icon is recoloured in two tones of the uniform, put under scanlines in a disc and set into the uniform's emblem in the accent colour, with a neon ring. Each programme receives a file number, `ID·F150`. |
@@ -1083,7 +1085,7 @@ follow the Slovenian locale.
 | Suspended by order | Auf Anordnung gesperrt | Ukinjeno po ukazu |
 | Uniforms | Uniformen | Uniforme |
 | Defect to another home screen | Zu anderem Startbildschirm überlaufen | Prebegni k drugemu domačemu zaslonu |
-| OFF GRID (REPORTED) · VPN (NOTED) | NETZFREI (GEMELDET) · VPN (VERMERKT) | BREZ OMREŽJA (PRIJAVLJENO) · VPN (ZABELEŽENO) |
+| OFF GRID · MOBILE · NOTED · UNIFORM | NETZFREI · MOBILFUNK · VERMERKT · UNIFORM | BREZ OMREŽJA · MOBILNO · ZABELEŽENO · UNIFORMA |
 | LAIBACH LIFE™ | LAIBACH LEBEN™ | LAIBACH LIFE™ |
 
 </details>

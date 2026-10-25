@@ -311,7 +311,7 @@ public class HomeActivity extends StateActivity {
         decree = new Decrees(this);
         onAir = new OnAir(this);
         artCredit = new ArtCredit(this);
-        View standing = monument.build(deadDrop.build(), ledger.build(), decree.build(), onAir.build(), artCredit.build());
+        View standing = monument.build(masthead.watch, deadDrop.build(), ledger.build(), decree.build(), onAir.build(), artCredit.build());
         register = new Register(this);
         register.build(root, standing);
         command = new Command(this);

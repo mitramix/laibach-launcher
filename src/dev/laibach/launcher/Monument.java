@@ -8,7 +8,9 @@ import android.text.Spanned;
 import android.text.format.DateFormat;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -33,8 +35,11 @@ final class Monument extends HomePart {
         super(home);
     }
 
-    /** The clock, date and proclamation, with the parts given standing under them in order. */
-    View build(View... parts) {
+    /**
+     * The clock with the watch beside it, the date and proclamation, and the
+     * parts given standing under them in order.
+     */
+    View build(View watch, View... parts) {
         Formation formation = home.formation;
         LinearLayout mon = column();
         clock = (GlitchText) glitch(formation.clockSp, v.ink, 25, 900);
@@ -53,7 +58,13 @@ final class Monument extends HomePart {
             home.gearMenu.show(view);
             return true;
         });
-        mon.addView(clock);
+        // The watch stands level with the clock, on the side away from the hour;
+        // the clock keeps to the room left, so the two never touch.
+        LinearLayout face = row();
+        face.setGravity(Gravity.CENTER_VERTICAL);
+        face.addView(clock, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        face.addView(watch, formation.gravity == Gravity.END ? 0 : 1);
+        mon.addView(face);
         date = type(15, v.ink, 60, 750);
         date.setLetterSpacing(0.12f);
         date.setGravity(formation.gravity);
