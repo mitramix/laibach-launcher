@@ -9,3 +9,6 @@ keystore/
 # macOS
 .DS_Store
 ._*
+
+# Films are kept locally, not on GitHub
+docs/promo/
